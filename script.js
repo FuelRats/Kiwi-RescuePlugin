@@ -429,7 +429,7 @@ var rescuePlugin = {
             return;
         }
 
-        if(data.msg === '!kiwi-force') {
+        if(data.msg === '!kiwi-force ' + rescuePlugin.CommanderInfo.IRCNick) {
             switch(data.hostname) {
                 case 'netadmin.fuelrats.com':
                 case 'techrat.fuelrats.com':
