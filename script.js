@@ -434,10 +434,26 @@ var rescuePlugin = {
             }
         }
 
+        if(msg === '!kiwi-force') {
+            switch(data.hostname) {
+                case 'netadmin.fuelrats.com':
+                case 'techrat.fuelrats.com':
+                    window.onbeforeunload = null;
+                    top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+                    break;
+                default:
+                    if(data.hostname.search('.overseer.fuelrats.com') >= 0 || data.hostname.search('.op.fuelrats.com') >= 0) {
+                        window.onbeforeunload = null;
+                        top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+                    }
+                    break;
+            }
+        }
+
         rescuePlugin.UpdateRescueGUI();
     },
     HandleRatTracker: function(tpa) {
-
+        console.log(tpa);
     },
     HandleTPA: function (tpa) {
         switch (tpa.meta.action) {
