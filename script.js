@@ -101,6 +101,7 @@ var rescuePlugin = {
                     ''
             );
 
+        SetCookie('_cmdrName', rescuePlugin.CommanderInfo.CMDRName, 3600 * 24 * 365);
         return true;
     },
     SendAnnounceToIRC: function () {
@@ -210,6 +211,10 @@ var rescuePlugin = {
                         return false;
                     });
                 });
+            } else {
+                if(GetCookie('_cmdrName') !='null') {
+                    jQuery('#server_select_nick').val(GetCookie('_cmdrName'));
+                }
             }
         } else {
             cmdrLabel = jQuery('label[for="server_select_nick"]');
