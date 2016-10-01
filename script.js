@@ -16,6 +16,33 @@
  */
 
 /**
+ * @typedef {object} TPAFriendRequest
+ * @type {object}
+ * @property {boolean} FriendRequest - Have FR been receieved?
+ * @property {string} RatID - The Rat sending the message
+ * @property {string} RescueID - The rescue ID
+ * @property {string} platform - Which platform this request is for
+ */
+
+/**
+ * @typedef {object} TPAWingRequest
+ * @type {object}
+ * @property {boolean} WingRequest - Have WR been receieved?
+ * @property {string} RatID - The Rat sending the message
+ * @property {string} RescueID - The rescue ID
+ * @property {string} platform - Which platform this request is for
+ */
+
+/**
+ * @typedef {object} TPABeaconSpotted
+ * @type {object}
+ * @property {boolean} BeaconSpotted - Have beacon been spotted?
+ * @property {string} RatID - The Rat sending the message
+ * @property {string} RescueID - The rescue ID
+ * @property {string} platform - Which platform this request is for
+ */
+
+/**
  * @typedef {object} RatData
  * @type {object}
  * @property {string} id - The ID of the Rat
@@ -499,12 +526,46 @@ var rescuePlugin = {
     },
     HandleRatTracker: function(tpa) {
         console.log(tpa);
+        var data;
+        switch(tpa.meta.action) {
+            case 'CallJumps:update':
+                break;
+            case 'FriendRequest:update':
+                /** @type TPAFriendRequest */
+                data = tpa.data;
+                if(data.RescueID == rescuePlugin.RescueInfo.Id) {
+                    rescuePlugin.RescueInfo.FriendReceived = data.FriendRequest;
+                }
+                break;
+            case 'WingRequest:update':
+                /** @type TPAWingRequest */
+                data = tpa.data;
+                if(data.RescueID == rescuePlugin.RescueInfo.Id) {
+                    rescuePlugin.RescueInfo.WingReceived = data.WingRequest;
+                }
+                break;
+            case 'SysArrived:update':
+                break;
+            case 'BeaconSpotted:update':
+                /** @type TPABeaconSpotted */
+                data = tpa.data;
+                if(data.RescueID == rescuePlugin.RescueInfo.Id) {
+                    rescuePlugin.RescueInfo.BeaconReceived = data.BeaconSpotted;
+                }
+                break;
+            case 'InstanceSuccessful:update':
+                break;
+            case 'Fueled:update':
+                break;
+        }
+
+        rescuePlugin.UpdateRescueGUI();
     },
     HandleTPA: function (tpa) {
         switch (tpa.meta.action) {
             case 'rescue:created':
             case 'rescue:updated':
-                if (tpa.data.client === rescuePlugin.CommanderInfo.CMDRName) {
+                if (tpa.data.client === rescuePlugin.CommanderInfo.CMDRName && rescuePlugin.RescueInfo.Id == null) {
                     rescuePlugin.GetInitialRescueInformation(tpa.data.id);
                 }
                 console.log(tpa);
@@ -518,7 +579,9 @@ var rescuePlugin = {
                 rescuePlugin.ParseInput(tpa.meta.ircmsg);
                 break;
             case 'rats:read':
-                rescuePlugin.CachedRats[tpa.data[0].id] = tpa.data[0];
+                if(tpa.data != undefined && tpa.data.length > 0) {
+                    rescuePlugin.CachedRats[tpa.data[0].id] = tpa.data[0];
+                }
                 break;
             case 'welcome':
             case 'stream:subscribe':
