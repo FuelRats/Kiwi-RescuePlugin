@@ -1,0 +1,41 @@
+#frrpRescueWindow 
+{
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	height: 150px;
+	padding: 5px;
+}
+
+#frrpRescueWindow .cmdrName {
+	font-weight: bold;	
+}
+
+#frrpRescueWindow .system {
+	font-style: italic;
+}
+
+#frrpRescueWindow .rats {
+	margin-top: 5px;
+}
+
+#frrpRescueWindow .rescue-status {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #88c56a;
+	color: #000000;
+	font-weight: bold;
+	text-align: center;
+}
+
+#kiwi .memberslist 
+{
+	bottom: 150px !important;
+}
+
+/*#kiwi span.part {
+	display: none !important;
+}*/
