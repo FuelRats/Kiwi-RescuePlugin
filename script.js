@@ -1,10 +1,37 @@
+/**
+ * @typedef {object} RescueData
+ * @type {object}
+ * @property {string} id - The ID of the rescue
+ * @property {string} client - The CMDR Name of the client
+ * @property {string} system - The system where the client is located
+ * @property {boolean} active - Shows if the rescue is active or not
+ * @property {boolean} codeRed - Shows if the rescue is code red or not
+ * @property {boolean} open - Shows if the rescue is open or not
+ * @property {string} platform - Shows which platform the client is using (PC/Xbox)
+ * @property {object} createdAt - When the rescue was created (UTC)
+ * @property {object} updatedAt - When the rescue was updated (UTC)
+ * @property {string} title - The title of an Epic rescue
+ * @property {object} data - The meta-data of a rescue
+ * @property {object} rats - The rats assigned to the rescue
+ */
+
+/**
+ * @typedef {object} RatData
+ * @type {object}
+ * @property {string} id - The ID of the Rat
+ * @property {string} CMDRname - The CMDR Name of the rat
+ * @property {string} platform - The platform of the rat
+ * @property {object} createdAt - When the rat was created (UTC)
+ * @property {object} updatedAt - When the rat was updated (UTC)
+ */
+
 var rescuePlugin = {
     AnnouncerUrl: rescueConfig.AnnouncerUrl,
     ApiUrl: rescueConfig.ApiUrl,
     UseClientForm: true,
     CommanderInfo: {
-        CMDRName: null,
-        IRCNick: null,
+        CMDRName: '',
+        IRCNick: '',
         EO2: null,
         System: null,
         Platform: null,
@@ -27,6 +54,7 @@ var rescuePlugin = {
         Title: null,
         CreatedAt: null,
         UpdatedAt: null,
+        /** @type {object<string, RatData>} */
         Rats: {},
         UnidentifiedRats: {},
         FirstLimpet: null,
@@ -35,6 +63,9 @@ var rescuePlugin = {
         WingReceived: false,
         BeaconReceived: false
     },
+    /**
+     * @returns boolean
+     */
     SetCommanderInfo: function () {
         SetCookie('LoginTimeStamp', new Date().getTime());
         function sanitizeCMDRName(cmdrName) {
@@ -50,7 +81,7 @@ var rescuePlugin = {
             cmdrName = cmdrName.replace(/\./g, '');
             cmdrName = transliterate(cmdrName);
             cmdrName = removeDiacritics(cmdrName);
-            cmdrName = cmdrName.replace(/([^A-Za-z0-9\[\]{}\^´`_\\\|-]+)/g, '');
+            cmdrName = cmdrName.replace(/([^A-Za-z0-9\[\]{}\^´`_\\|-]+)/g, '');
             cmdrName = cmdrName.replace(/^\d+/, '');
             return cmdrName;
         }
@@ -194,10 +225,11 @@ var rescuePlugin = {
                     jQuery('#server_select_nick').val(rescuePlugin.RescueInfo.Client).attr('readonly', 'readonly');
                     jQuery('#system').val(rescuePlugin.RescueInfo.System).attr('readonly', 'readonly');
                     jQuery('#platform').val(rescuePlugin.RescueInfo.Platform.toUpperCase()).attr('disabled', 'disabled');
+                    var eo2 = jQuery('#EO2');
                     if (rescuePlugin.RescueInfo.CodeRed) {
-                        jQuery('#EO2').attr('checked', 'checked');
+                        eo2.attr('checked', 'checked');
                     }
-                    jQuery('#EO2').attr('disabled', 'disabled');
+                    eo2.attr('disabled', 'disabled');
 
                     var rerescueMe = jQuery('<button class="rehelp-me">I need help again!</button>');
                     jQuery('.start button').before(rerescueMe);
@@ -251,6 +283,7 @@ var rescuePlugin = {
             type: 'GET',
             success: function (data) {
                 if (data.data.length > 0) {
+                    /** @type RescueData */
                     var rescue = data.data[0];
                     rescuePlugin.CommanderInfo.RescueId = rescue.id;
 
@@ -287,12 +320,6 @@ var rescuePlugin = {
                 if (typeof onLoad != 'undefined' && typeof onLoad == 'function') {
                     onLoad();
                 }
-            },
-            error: function () {
-                if (rescuePlugin.UpdateTimer != undefined) {
-                    clearTimeout(rescuePlugin.UpdateTimer);
-                }
-                rescuePlugin.UpdateTimer = setTimeout(rescuePlugin.GetInitialRescueInformation, rescuePlugin.UpdateInterval);
             }
         });
     },
@@ -353,7 +380,19 @@ var rescuePlugin = {
         }
     },
     CachedRats: {},
+    /**
+     * @typedef IRCRats
+     * @type {object<string, object[]>}
+     */
     IRCRats: {},
+    /**
+     *
+     * @param {Object} data - Contains the information from the API
+     * @param {string} data.nick - Nickname of the user
+     * @param {string} data.msg - The message that was written
+     * @param {string} data.hostname - The hostname of the user that wrote
+     * @param {string} data.type - The type of message receieved
+     */
     ParseInput: function (data) {
         if (data.nick === rescuePlugin.CommanderInfo.IRCNick || data.nick === 'RatMama[BOT]' || data.nick === 'MechaSqueak[BOT]') {
             return;
@@ -380,7 +419,7 @@ var rescuePlugin = {
             console.log(data);
         }
 
-        if (rescuePlugin.IRCRats[data.nick] == undefined) {
+        if (rescuePlugin.IRCRats[data.nick] == null) {
             frWs.searchNickName(data.nick, { 'ircmsg': data });
         } else {
             if (rescuePlugin.IRCRats[data.nick].length > 0) {
