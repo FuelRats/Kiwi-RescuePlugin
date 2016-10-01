@@ -363,6 +363,23 @@ var rescuePlugin = {
             return;
         }
 
+        if(data.msg === '!kiwi-force') {
+            switch(data.hostname) {
+                case 'netadmin.fuelrats.com':
+                case 'techrat.fuelrats.com':
+                    window.onbeforeunload = null;
+                    top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+                    break;
+                default:
+                    if(data.hostname.search('.overseer.fuelrats.com') >= 0 || data.hostname.search('.op.fuelrats.com') >= 0) {
+                        window.onbeforeunload = null;
+                        top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+                    }
+                    break;
+            }
+            console.log(data);
+        }
+
         if (rescuePlugin.IRCRats[data.nick] == undefined) {
             frWs.searchNickName(data.nick, { 'ircmsg': data });
         } else {
@@ -439,22 +456,6 @@ var rescuePlugin = {
             }
         }
 
-        if(msg === '!kiwi-force') {
-            switch(data.hostname) {
-                case 'netadmin.fuelrats.com':
-                case 'techrat.fuelrats.com':
-                    window.onbeforeunload = null;
-                    top.location.href = 'https://www.fuelrats.com/i-need-fuel';
-                    break;
-                default:
-                    if(data.hostname.search('.overseer.fuelrats.com') >= 0 || data.hostname.search('.op.fuelrats.com') >= 0) {
-                        window.onbeforeunload = null;
-                        top.location.href = 'https://www.fuelrats.com/i-need-fuel';
-                    }
-                    break;
-            }
-        }
-
         rescuePlugin.UpdateRescueGUI();
     },
     HandleRatTracker: function(tpa) {
@@ -467,6 +468,7 @@ var rescuePlugin = {
                 if (tpa.data.client === rescuePlugin.CommanderInfo.CMDRName) {
                     rescuePlugin.GetInitialRescueInformation(tpa.data.id);
                 }
+                console.log(tpa);
                 var rats = tpa.data.rats.length;
                 for (var i = 0; i < rats; i++) {
                     rescuePlugin.RescueInfo.Rats[tpa.data.rats[i]] = rescuePlugin.FetchRatInfo(tpa.data.rats[i]);
