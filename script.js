@@ -61,10 +61,22 @@ var rescuePlugin = {
 
         document.getElementById('server_select_nick').value = rescuePlugin.CommanderInfo.IRCNick;
 
+        if(rescuePlugin.CommanderInfo.IRCNick.search('client_') >= 0) {
+            alert('Please enter your CMDR Name so we can help you faster!');
+            return false;
+        }
+
+
+
         rescuePlugin.CommanderInfo.System = 'unknown';
         var sysItem = document.getElementById('system');
         if (sysItem != undefined && sysItem.value !== '') {
             rescuePlugin.CommanderInfo.System = sysItem.value.trim();
+        }
+
+        if(rescuePlugin.CommanderInfo.System == 'unknown') {
+            alert('Please enter which system you are located in.\nYou can find this in your left panel.');
+            return false;
         }
 
         rescuePlugin.CommanderInfo.Platform = 'unknown';
@@ -75,6 +87,10 @@ var rescuePlugin = {
 
         rescuePlugin.CommanderInfo.EO2 = document.querySelector('#EO2').checked ? 'NOT OK' : 'OK';
 
+        if(rescuePlugin.CommanderInfo.EO2 == 'NOT OK') {
+            alert('Please log out to the main menu immediately!\nDo not forget to write down your current position!');
+        }
+
         rescuePlugin.CommanderInfo.ExtraData =
             (navigator.language ?
                 'Language: ' + getLanguageName(navigator.language) + ' (' + navigator.language + ')' :
@@ -84,6 +100,8 @@ var rescuePlugin = {
                 ' - IRC Nickname: ' + rescuePlugin.CommanderInfo.IRCNick :
                     ''
             );
+
+        return true;
     },
     SendAnnounceToIRC: function () {
         if (GetCookie('LoginTimeStamp') == 'null') {
