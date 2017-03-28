@@ -228,7 +228,7 @@ var rescuePlugin = {
 
             var platformItem = jQuery('.platform');
             if (platformItem.length == 0) {
-                platformItem = jQuery('<tr class="platform"><td><label for="server_select_platform">Platform</label></td><td><select name="platform" id="platform"><option value="PC">PC</option><option value="XB">XB</option></select></td></tr>');
+                platformItem = jQuery('<tr class="platform"><td><label for="server_select_platform">Platform</label></td><td><select name="platform" id="platform"><option value="PC">PC</option><option value="XB">XB</option><option value="PS4">PS4</option></select></td></tr>');
                 systemItem.after(platformItem);
             }
 
