@@ -137,7 +137,7 @@
 		},
 		"zh":{
 			"name":"Chinese",
-			"nativeName":"中文 (Zhōngwén), 汉语, 漢語"
+			"nativeName":"中文, 汉语, 漢語"
 		},
 		"cv":{
 			"name":"Chuvash",
@@ -244,7 +244,7 @@
 			"nativeName":"Hausa, هَوُسَ"
 		},
 		"he":{
-			"name":"Hebrew (modern)",
+			"name":"Hebrew",
 			"nativeName":"עברית"
 		},
 		"hz":{
@@ -305,7 +305,7 @@
 		},
 		"ja":{
 			"name":"Japanese",
-			"nativeName":"日本語 (にほんご／にっぽんご)"
+			"nativeName":"日本語"
 		},
 		"jv":{
 			"name":"Javanese",
@@ -357,7 +357,7 @@
 		},
 		"ko":{
 			"name":"Korean",
-			"nativeName":"한국어 (韓國語), 조선말 (朝鮮語)"
+			"nativeName":"한국어, 조선말"
 		},
 		"ku":{
 			"name":"Kurdish",
@@ -432,7 +432,7 @@
 			"nativeName":"te reo Māori"
 		},
 		"mr":{
-			"name":"Marathi (Marāṭhī)",
+			"name":"Marathi",
 			"nativeName":"मराठी"
 		},
 		"mh":{
@@ -552,7 +552,7 @@
 			"nativeName":"русский язык"
 		},
 		"sa":{
-			"name":"Sanskrit (Saṁskṛta)",
+			"name":"Sanskrit",
 			"nativeName":"संस्कृतम्"
 		},
 		"sc":{
@@ -664,7 +664,7 @@
 			"nativeName":"Setswana"
 		},
 		"to":{
-			"name":"Tonga (Tonga Islands)",
+			"name":"Tonga",
 			"nativeName":"faka Tonga"
 		},
 		"tr":{
