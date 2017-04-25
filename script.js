@@ -245,7 +245,7 @@ var rescuePlugin = {
             contentHolder.empty();
             contentHolder.append(topPanel);
 
-            infoText = jQuery('<div style="margin: 70px 20px 1em;"><p style="font-style:italic;">Thank you for providing your information! We\'re ready to assist you on our IRC server, which you will reach by clicking the <strong>Start</strong> button to the left<br /><br />Please leave your <strong>commander name</strong> intact so we know who you are</p></div>');
+            infoText = jQuery('<div style="margin: 70px 20px 1em;"><p style="font-style:italic;">Thank you for providing your information! We\'re ready to assist you on our IRC server, which you will reach by clicking the <strong>Start</strong> button to the left.<br><br>Please leave your <strong>commander name</strong> intact so we know who you are.<br><br><strong>Note:</strong> If you\'re currently in multicrew, only the ship owner needs to call for a rescue.  After you enter our IRC, you\'ll be asked to leave multicrew.</p></div>');
             contentHolder.append(infoText);
             if (GetCookie('sentAnnounce') != "null" && loadFromOngoingRescue != undefined && loadFromOngoingRescue) {
                 rescuePlugin.GetInitialRescueInformation(GetCookie('sentAnnounce'), function () {
