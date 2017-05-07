@@ -1,4 +1,4 @@
-#FuelRats Rescue-plugin for KiwiIRC
+# FuelRats Rescue-plugin for KiwiIRC
 
 This plugin is used in the KiwiIRC-client to show the rescue information that is available to the clients.
 
