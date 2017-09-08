@@ -56,6 +56,7 @@ var rescuePlugin = {
     AnnouncerUrl: rescueConfig.AnnouncerUrl,
     ApiUrl: rescueConfig.ApiUrl,
     UseClientForm: true,
+    TestMode: false,
     CommanderInfo: {
         CMDRName: '',
         IRCNick: '',
@@ -242,6 +243,14 @@ var rescuePlugin = {
             jQuery('.server_select.initial').css({'margin-top': '155px', 'width': '620px'});
             topPanel = jQuery('<div style="height: 150px; background-color: rgba(0,0,0,0.9); position: fixed; top: 0; left: 0; right: 0;"><img src="/kiwi/assets/plugins/FuelRats-RescuePlugin/fuelrats.png" alt="Fuel Rats" title="Fuel Rats" style="width: 138px; margin-left: 5px; margin-top: 5px;" /></div>');
 
+            if (rescuePlugin.TestMode) {
+                jQuery('.server_select.initial').css({'margin-top': '0' });
+                document.styleSheets[0].addRule('#kiwi .server_select.initial:before', 'background: #FFFFFF !important');
+                document.styleSheets[0].addRule('#kiwi button', 'background: #e6434b !important; color: #FFFFFF !important;');
+                // #e6434b
+                topPanel = jQuery(''); // append(jQuery('<span style="color: red; font-weight: bold;">TESTMODE</span>'));
+            }
+            
             contentHolder.empty();
             contentHolder.append(topPanel);
 
@@ -599,7 +608,7 @@ var rescuePlugin = {
 
 jQuery(document).ready(function () {
     var network = kiwi.components.Network();
-
+    rescuePlugin.TestMode = (window.location.hash && window.location.hash.substring(1) === 'testmode');
     if (rescuePlugin.UseClientForm) {
         network.on('connect', rescuePlugin.SendAnnounceToIRC);
         frWs.init();
