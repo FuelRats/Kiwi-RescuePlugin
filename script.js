@@ -56,7 +56,7 @@ var rescuePlugin = {
     AnnouncerUrl: rescueConfig.AnnouncerUrl,
     ApiUrl: rescueConfig.ApiUrl,
     UseClientForm: true,
-    TestMode: false,
+    TestMode: true,
     CommanderInfo: {
         CMDRName: '',
         IRCNick: '',
@@ -608,7 +608,7 @@ var rescuePlugin = {
 
 jQuery(document).ready(function () {
     var network = kiwi.components.Network();
-    rescuePlugin.TestMode = (window.location.hash && window.location.hash.substring(1) === 'testmode');
+    rescuePlugin.TestMode = true; //(window.location.hash && window.location.hash.substring(1) === 'testmode');
     if (rescuePlugin.UseClientForm) {
         network.on('connect', rescuePlugin.SendAnnounceToIRC);
         frWs.init();
