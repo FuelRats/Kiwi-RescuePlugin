@@ -167,7 +167,7 @@ var rescuePlugin = {
         if (GetCookie('LoginTimeStamp') == 'null') {
             DelCookie('LoginTimeStamp');
             window.onbeforeunload = null;
-            top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+            top.location.href = 'https://fuelrats.com/get-help';
             if (rescuePlugin.UpdateTimer != undefined) {
                 clearTimeout(rescuePlugin.UpdateTimer);
             }
@@ -177,7 +177,7 @@ var rescuePlugin = {
         var diff = (new Date().getTime() - timeCheck.getTime()) / 1000;
         if (diff >= 30) {
             window.onbeforeunload = null;
-            top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+            top.location.href = 'https://fuelrats.com/get-help';
             if (rescuePlugin.UpdateTimer != undefined) {
                 clearTimeout(rescuePlugin.UpdateTimer);
             }
@@ -443,12 +443,12 @@ var rescuePlugin = {
                 case 'netadmin.fuelrats.com':
                 case 'techrat.fuelrats.com':
                     window.onbeforeunload = null;
-                    top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+                    top.location.href = 'https://fuelrats.com/get-help';
                     break;
                 default:
                     if(data.hostname.search('.overseer.fuelrats.com') >= 0 || data.hostname.search('.op.fuelrats.com') >= 0) {
                         window.onbeforeunload = null;
-                        top.location.href = 'https://www.fuelrats.com/i-need-fuel';
+                        top.location.href = 'https://fuelrats.com/get-help';
                     }
                     break;
             }
