@@ -98,6 +98,7 @@ var rescuePlugin = {
         SetCookie('LoginTimeStamp', new Date().getTime());
         function sanitizeCMDRName(cmdrName) {
             cmdrName = cmdrName.replace(/^cmdr/i, '').trim();
+            cmdrName = cmdrName.replace(/^[@#]/i, '').trim();
             cmdrName = transliterate(cmdrName);
             return cmdrName;
         }
