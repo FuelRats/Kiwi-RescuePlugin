@@ -110,8 +110,9 @@ var rescuePlugin = {
             cmdrName = cmdrName.replace(/\./g, '');
             cmdrName = transliterate(cmdrName);
             cmdrName = removeDiacritics(cmdrName);
+            cmdrName = cmdrName.replace(/([^A-Za-z0-9\[\]{}\^_])/g, '');
             cmdrName = cmdrName.replace(/([^A-Za-z0-9\[\]{}\^´`_\\|-]+)/g, '');
-            cmdrName = cmdrName.replace(/^\d+/, '');
+            cmdrName = cmdrName.replace(/^\d+/, '').trim();
             return cmdrName;
         }
 
