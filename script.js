@@ -243,8 +243,8 @@ var rescuePlugin = {
 
             if (rescuePlugin.TestMode) {
                 jQuery('.server_select.initial').css({'margin-top': '0' });
-                document.styleSheets[0].insertRule('#kiwi .server_select.initial:before', 'background: #FFFFFF !important');
-                document.styleSheets[0].insertRule('#kiwi button', 'background: #e6434b !important; color: #FFFFFF !important;');
+                document.styleSheets[0].insertRule('#kiwi .server_select.initial:before { background: #FFFFFF !important; }');
+                document.styleSheets[0].insertRule('#kiwi button { background: #e6434b !important; color: #FFFFFF !important; }');
                 // #e6434b
                 topPanel = jQuery(''); // append(jQuery('<span style="color: red; font-weight: bold;">TESTMODE</span>'));
             }
