@@ -244,11 +244,11 @@ var rescuePlugin = {
             topPanel = jQuery('<div style="height: 150px; background-color: rgba(0,0,0,0.9); position: fixed; top: 0; left: 0; right: 0;"><img src="/kiwi/assets/plugins/FuelRats-RescuePlugin/fuelrats.png" alt="Fuel Rats" title="Fuel Rats" style="width: 138px; margin-left: 5px; margin-top: 5px;" /></div>');
 
             if (rescuePlugin.TestMode) {
-                jQuery('.server_select.initial').css({'margin-top': '0' });
+                //jQuery('.server_select.initial').css({'margin-top': '0' });
                 document.styleSheets[0].insertRule('#kiwi .server_select.initial:before { background: #FFFFFF !important; }', 0);
                 document.styleSheets[0].insertRule('#kiwi button { background: #e6434b !important; color: #FFFFFF !important; }', 0);
                 // #e6434b
-                topPanel = jQuery(''); // append(jQuery('<span style="color: red; font-weight: bold;">TESTMODE</span>'));
+                //topPanel = jQuery(''); // append(jQuery('<span style="color: red; font-weight: bold;">TESTMODE</span>'));
             }
             
             contentHolder.empty();
