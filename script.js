@@ -52,6 +52,16 @@
  * @property {object} updatedAt - When the rat was updated (UTC)
  */
 
+// Polyfills JUST IN CASE.
+
+// String.endsWith()
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith
+if (!String.prototype.endsWith) {String.prototype.endsWith = function(searchStr, Position) { if(!(Position < this.length)) { Position = this.length; } else { Position |= 0; } return this.substr(Position - searchStr.length, searchStr.length) === searchStr; };}
+
+// Array.findIndex()
+// https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+if (!Array.prototype.findIndex) { Object.defineProperty(Array.prototype, 'findIndex', {value: function(predicate) { if (this == null) {throw new TypeError('"this" is null or not defined');} if (typeof predicate !== 'function') {throw new TypeError('predicate must be a function');} var o = Object(this), len = o.length >>> 0, thisArg = arguments[1], k = 0; while (k < len) {var kValue = o[k]; if (predicate.call(thisArg, kValue, k, o)) { return k;} k++; } return -1; }});}
+
 var rescuePlugin = {
     AnnouncerUrl: rescueConfig.AnnouncerUrl,
     ApiUrl: rescueConfig.ApiUrl,
@@ -437,22 +447,23 @@ var rescuePlugin = {
         if (data.type != 'message') {
             return;
         }
-
+        
         if(data.msg === '!kiwi-force ' + rescuePlugin.CommanderInfo.IRCNick) {
-            switch(data.hostname) {
-                case 'netadmin.fuelrats.com':
-                case 'techrat.fuelrats.com':
-                    window.onbeforeunload = null;
-                    top.location.href = 'https://fuelrats.com/get-help';
-                    break;
-                default:
-                    if(data.hostname.search('.overseer.fuelrats.com') >= 0 || data.hostname.search('.op.fuelrats.com') >= 0) {
-                        window.onbeforeunload = null;
-                        top.location.href = 'https://fuelrats.com/get-help';
-                    }
-                    break;
-            }
             console.log(data);
+
+            var allowedVhosts = [
+                'admin.fuelrats.com', 
+                '.op.fuelrats.com',
+                'netadmin.fuelrats.com', 
+                '.overseer.fuelrats.com',
+                '.techrat.fuelrats.com',
+                'i.see.all'
+            ];
+
+            if(allowedVhosts.findIndex(function(vhost) {return data.hostname.endsWith(vhost);}) >= 0) {
+                window.onbeforeunload = null;
+                top.location.href = 'https://fuelrats.com/get-help';
+            }            
         }
 
         if (rescuePlugin.IRCRats[data.nick] == null) {
