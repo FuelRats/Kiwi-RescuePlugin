@@ -1,5 +1,6 @@
 var rescueConfig = {
 	AnnouncerUrl: '',
 	ApiUrl: '',
-	WSUrl: ''
+	WSUrl: '',
+	titleBar: ''
 };

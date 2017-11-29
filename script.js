@@ -417,6 +417,15 @@ var rescuePlugin = {
                 }
             }
         }
+
+        if (undefined !== rescueConfig.titleBar && '' !== rescueConfig.titleBar) {
+            if (jQuery('li.connection.titleBar').length == 0) {
+                var titleBar = jQuery('<li class="connection titleBar"><ul class="panellist"><li class="alert_activity"><span></span></li></ul></li>');
+                var textHolder = titleBar.find('span');
+                textHolder.html(rescueConfig.titleBar);
+                jQuery('ul.connections').append(titleBar);
+            }
+        }
     },
     FetchRatInfo: function (ratId) {
         if (rescuePlugin.CachedRats[ratId]) {
