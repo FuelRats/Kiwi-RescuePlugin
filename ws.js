@@ -16,7 +16,7 @@ var frWs = {
 	},
 	onMessage: function(data) {
 		var _data = JSON.parse(data.data);
-		if(_data.meta.action == 'welcome') {
+		if(_data.meta.event == 'welcome') {
 			frWs.clientId = _data.meta.id;
 		}
 		rescuePlugin.HandleTPA(_data);
