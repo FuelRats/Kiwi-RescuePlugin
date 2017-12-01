@@ -556,7 +556,7 @@ var rescuePlugin = {
     HandleRatTracker: function(tpa) {
         console.log(tpa);
         var data;
-        switch(tpa.meta.action) {
+        switch(tpa.meta.event) {
             case 'CallJumps:update':
                 break;
             case 'FriendRequest:update':
@@ -591,7 +591,7 @@ var rescuePlugin = {
         rescuePlugin.UpdateRescueGUI();
     },
     HandleTPA: function (tpa) {
-        switch (tpa.meta.action) {
+        switch (tpa.meta.event) {
             case 'rescue:created':
             case 'rescue:updated':
                 if (tpa.data.client === rescuePlugin.CommanderInfo.CMDRName && rescuePlugin.RescueInfo.Id == null) {
@@ -642,6 +642,7 @@ jQuery(document).ready(function () {
     if (rescuePlugin.UseClientForm) {
         network.on('message:message', rescuePlugin.ParseInput);
     }
+    setTimeout(function() { rescuePlugin.UpdateRescueGUI(); }, 500);
 });
 
 //function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
