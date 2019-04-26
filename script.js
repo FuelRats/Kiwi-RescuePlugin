@@ -109,7 +109,7 @@ var rescuePlugin = {
         function sanitizeCMDRName(cmdrName) {
             cmdrName = cmdrName.replace(/^cmdr/i, '').trim();
             cmdrName = cmdrName.replace(/^[@#]/i, '').trim();
-            cmdrName = transliterate(cmdrName);
+            // cmdrName = transliterate(cmdrName);
             return cmdrName;
         }
 
