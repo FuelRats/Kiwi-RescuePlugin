@@ -56,11 +56,43 @@
 
 // String.endsWith()
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith
-if (!String.prototype.endsWith) {String.prototype.endsWith = function(searchStr, Position) { if(!(Position < this.length)) { Position = this.length; } else { Position |= 0; } return this.substr(Position - searchStr.length, searchStr.length) === searchStr; };}
+if (!String.prototype.endsWith) {
+    String.prototype.endsWith = function (searchStr, Position) {
+        if (!(Position < this.length)) {
+            Position = this.length;
+        } else {
+            Position |= 0;
+        }
+        return this.substr(Position - searchStr.length, searchStr.length) === searchStr;
+    };
+}
 
 // Array.findIndex()
 // https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
-if (!Array.prototype.findIndex) { Object.defineProperty(Array.prototype, 'findIndex', {value: function(predicate) { if (this == null) {throw new TypeError('"this" is null or not defined');} if (typeof predicate !== 'function') {throw new TypeError('predicate must be a function');} var o = Object(this), len = o.length >>> 0, thisArg = arguments[1], k = 0; while (k < len) {var kValue = o[k]; if (predicate.call(thisArg, kValue, k, o)) { return k;} k++; } return -1; }});}
+if (!Array.prototype.findIndex) {
+    Object.defineProperty(Array.prototype, 'findIndex', {
+        value: function (predicate) {
+            if (this == null) {
+                throw new TypeError('"this" is null or not defined');
+            }
+            if (typeof predicate !== 'function') {
+                throw new TypeError('predicate must be a function');
+            }
+            var o = Object(this),
+                len = o.length >>> 0,
+                thisArg = arguments[1],
+                k = 0;
+            while (k < len) {
+                var kValue = o[k];
+                if (predicate.call(thisArg, kValue, k, o)) {
+                    return k;
+                }
+                k++;
+            }
+            return -1;
+        }
+    });
+}
 
 var rescuePlugin = {
     AnnouncerUrl: rescueConfig.AnnouncerUrl,
@@ -106,6 +138,7 @@ var rescuePlugin = {
      */
     SetCommanderInfo: function () {
         SetCookie('LoginTimeStamp', new Date().getTime());
+
         function sanitizeCMDRName(cmdrName) {
             cmdrName = cmdrName.replace(/^cmdr/i, '').trim();
             cmdrName = cmdrName.replace(/^[@#]/i, '').trim();
@@ -132,7 +165,7 @@ var rescuePlugin = {
 
         document.getElementById('server_select_nick').value = rescuePlugin.CommanderInfo.IRCNick;
 
-        if(rescuePlugin.CommanderInfo.IRCNick.search('client_') >= 0) {
+        if (rescuePlugin.CommanderInfo.IRCNick.search('client_') >= 0) {
             alert('Please enter your CMDR Name so we can help you faster!');
             return false;
         }
@@ -143,7 +176,7 @@ var rescuePlugin = {
             rescuePlugin.CommanderInfo.System = sysItem.value.trim();
         }
 
-        if(rescuePlugin.CommanderInfo.System == 'unknown') {
+        if (rescuePlugin.CommanderInfo.System == 'unknown') {
             alert('Please enter which system you are located in.\nYou can find this in your left panel.');
             return false;
         }
@@ -156,18 +189,18 @@ var rescuePlugin = {
 
         rescuePlugin.CommanderInfo.EO2 = document.querySelector('#EO2').checked ? 'NOT OK' : 'OK';
 
-        if(rescuePlugin.CommanderInfo.EO2 == 'NOT OK') {
+        if (rescuePlugin.CommanderInfo.EO2 == 'NOT OK') {
             alert('Please log out to the main menu immediately!\nDo not forget to write down your current position!');
         }
 
         rescuePlugin.CommanderInfo.ExtraData =
             (navigator.language ?
                 'Language: ' + getLanguageName(navigator.language) + ' (' + navigator.language + ')' :
-                    'x'
+                'x'
             ) +
             (rescuePlugin.CommanderInfo.CMDRName != rescuePlugin.CommanderInfo.IRCNick ?
                 ' - IRC Nickname: ' + rescuePlugin.CommanderInfo.IRCNick :
-                    ''
+                ''
             );
 
         SetCookie('_cmdrName', rescuePlugin.CommanderInfo.CMDRName, 3600 * 24 * 365);
@@ -201,9 +234,8 @@ var rescuePlugin = {
         if (rescuePlugin.CommanderInfo.CMDRName !== null) {
             jQuery.ajax({
                 url: rescuePlugin.AnnouncerUrl,
-                type: 'GET',
-                crossDomain: true,
-                dataType: 'jsonp',
+                type: 'POST',
+                dataType: 'json',
                 data: {
                     cmdrname: rescuePlugin.CommanderInfo.CMDRName,
                     EO2: rescuePlugin.CommanderInfo.EO2,
@@ -211,8 +243,7 @@ var rescuePlugin = {
                     platform: rescuePlugin.CommanderInfo.Platform,
                     extradata: rescuePlugin.CommanderInfo.ExtraData
                 },
-                success: function () {
-                }
+                success: function () {}
             });
         }
     },
@@ -250,7 +281,10 @@ var rescuePlugin = {
             }
 
             contentHolder = jQuery('.side_panel .content');
-            jQuery('.server_select.initial').css({'margin-top': '155px', 'width': '620px'});
+            jQuery('.server_select.initial').css({
+                'margin-top': '155px',
+                'width': '620px'
+            });
             topPanel = jQuery('<div style="height: 150px; background-color: rgba(0,0,0,0.9); position: fixed; top: 0; left: 0; right: 0;"><img src="/kiwi/assets/plugins/FuelRats-RescuePlugin/fuelrats.png" alt="Fuel Rats" title="Fuel Rats" style="width: 138px; margin-left: 5px; margin-top: 5px;" /></div>');
 
             if (rescuePlugin.TestMode) {
@@ -260,7 +294,7 @@ var rescuePlugin = {
                 // #e6434b
                 //topPanel = jQuery(''); // append(jQuery('<span style="color: red; font-weight: bold;">TESTMODE</span>'));
             }
-            
+
             contentHolder.empty();
             contentHolder.append(topPanel);
 
@@ -290,7 +324,7 @@ var rescuePlugin = {
                     });
                 });
             } else {
-                if(GetCookie('_cmdrName') !='null') {
+                if (GetCookie('_cmdrName') != 'null') {
                     jQuery('#server_select_nick').val(GetCookie('_cmdrName'));
                 }
             }
@@ -305,7 +339,10 @@ var rescuePlugin = {
             jQuery('.status').text('Please enter your details below...');
 
             contentHolder = jQuery('.side_panel .content');
-            jQuery('.server_select.initial').css({'margin-top': '155px', 'width': '620px'});
+            jQuery('.server_select.initial').css({
+                'margin-top': '155px',
+                'width': '620px'
+            });
             topPanel = jQuery('<div style="height: 150px; background-color: rgba(0,0,0,0.9); position: fixed; top: 0; left: 0; right: 0;"><img src="/kiwi/assets/plugins/FuelRats-RescuePlugin/fuelrats.png" alt="Fuel Rats" title="Fuel Rats" style="width: 138px; margin-left: 5px; margin-top: 5px;" /></div>');
 
             contentHolder.empty();
@@ -431,7 +468,9 @@ var rescuePlugin = {
         if (rescuePlugin.CachedRats[ratId]) {
             return rescuePlugin.CachedRats[ratId];
         } else {
-            frWs.send('rats:read', { 'id': ratId });
+            frWs.send('rats:read', {
+                'id': ratId
+            });
         }
     },
     CachedRats: {},
@@ -456,27 +495,31 @@ var rescuePlugin = {
         if (data.type != 'message') {
             return;
         }
-        
-        if(data.msg === '!kiwi-force ' + rescuePlugin.CommanderInfo.IRCNick) {
+
+        if (data.msg === '!kiwi-force ' + rescuePlugin.CommanderInfo.IRCNick) {
             console.log(data);
 
             var allowedVhosts = [
-                'admin.fuelrats.com', 
+                'admin.fuelrats.com',
                 '.op.fuelrats.com',
-                'netadmin.fuelrats.com', 
+                'netadmin.fuelrats.com',
                 '.overseer.fuelrats.com',
                 '.techrat.fuelrats.com',
                 'i.see.all'
             ];
 
-            if(allowedVhosts.findIndex(function(vhost) {return data.hostname.endsWith(vhost);}) >= 0) {
+            if (allowedVhosts.findIndex(function (vhost) {
+                    return data.hostname.endsWith(vhost);
+                }) >= 0) {
                 window.onbeforeunload = null;
                 top.location.href = 'https://fuelrats.com/get-help';
-            }            
+            }
         }
 
         if (rescuePlugin.IRCRats[data.nick] == null) {
-            frWs.searchNickName(data.nick, { 'ircmsg': data });
+            frWs.searchNickName(data.nick, {
+                'ircmsg': data
+            });
         } else {
             if (rescuePlugin.IRCRats[data.nick].length > 0) {
                 var rat = rescuePlugin.IRCRats[data.nick][0].rats[0];
@@ -553,23 +596,23 @@ var rescuePlugin = {
 
         rescuePlugin.UpdateRescueGUI();
     },
-    HandleRatTracker: function(tpa) {
+    HandleRatTracker: function (tpa) {
         console.log(tpa);
         var data;
-        switch(tpa.meta.event) {
+        switch (tpa.meta.event) {
             case 'CallJumps:update':
                 break;
             case 'FriendRequest:update':
                 /** @type TPAFriendRequest */
                 data = tpa.data;
-                if(data.RescueID == rescuePlugin.RescueInfo.Id) {
+                if (data.RescueID == rescuePlugin.RescueInfo.Id) {
                     rescuePlugin.RescueInfo.FriendReceived = data.FriendRequest;
                 }
                 break;
             case 'WingRequest:update':
                 /** @type TPAWingRequest */
                 data = tpa.data;
-                if(data.RescueID == rescuePlugin.RescueInfo.Id) {
+                if (data.RescueID == rescuePlugin.RescueInfo.Id) {
                     rescuePlugin.RescueInfo.WingReceived = data.WingRequest;
                 }
                 break;
@@ -578,7 +621,7 @@ var rescuePlugin = {
             case 'BeaconSpotted:update':
                 /** @type TPABeaconSpotted */
                 data = tpa.data;
-                if(data.RescueID == rescuePlugin.RescueInfo.Id) {
+                if (data.RescueID == rescuePlugin.RescueInfo.Id) {
                     rescuePlugin.RescueInfo.BeaconReceived = data.BeaconSpotted;
                 }
                 break;
@@ -608,7 +651,7 @@ var rescuePlugin = {
                 rescuePlugin.ParseInput(tpa.meta.ircmsg);
                 break;
             case 'rats:read':
-                if(tpa.data != undefined && tpa.data.length > 0) {
+                if (tpa.data != undefined && tpa.data.length > 0) {
                     rescuePlugin.CachedRats[tpa.data[0].id] = tpa.data[0];
                 }
                 break;
@@ -616,7 +659,7 @@ var rescuePlugin = {
             case 'stream:subscribe':
                 break;
             default:
-                if(typeof tpa.meta.applicationId != 'undefined' && tpa.meta.applicationId == '0xDEADBEEF') {
+                if (typeof tpa.meta.applicationId != 'undefined' && tpa.meta.applicationId == '0xDEADBEEF') {
                     rescuePlugin.HandleRatTracker(tpa);
                     return;
                 }
@@ -642,7 +685,9 @@ jQuery(document).ready(function () {
     if (rescuePlugin.UseClientForm) {
         network.on('message:message', rescuePlugin.ParseInput);
     }
-    setTimeout(function() { rescuePlugin.UpdateRescueGUI(); }, 500);
+    setTimeout(function () {
+        rescuePlugin.UpdateRescueGUI();
+    }, 500);
 });
 
 //function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
