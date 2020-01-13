@@ -155,7 +155,13 @@ var rescuePlugin = {
             cmdrName = removeDiacritics(cmdrName);
             cmdrName = cmdrName.replace(/([^A-Za-z0-9\[\]{}\^_])/g, '');
             cmdrName = cmdrName.replace(/([^A-Za-z0-9\[\]{}\^´`_\\|-]+)/g, '');
-            cmdrName = cmdrName.replace(/^\d+/, '').trim();
+            if (cmdrName.match(/^\d+/)) {
+                cmdrName = "c_" + cmdrName;
+            }
+
+            if (cmdrName.length > 30) {
+                cmdrName = cmdrName.substring(0, 30);
+            }
             return cmdrName;
         }
 
@@ -187,7 +193,7 @@ var rescuePlugin = {
             rescuePlugin.CommanderInfo.Platform = platItem.value.trim();
         }
 
-        if(rescuePlugin.CommanderInfo.Platform.trim() === '') {
+        if (rescuePlugin.CommanderInfo.Platform.trim() === '') {
             alert('You must select what platform you are using.');
             return false;
         }
@@ -248,7 +254,7 @@ var rescuePlugin = {
                     platform: rescuePlugin.CommanderInfo.Platform,
                     extradata: rescuePlugin.CommanderInfo.ExtraData
                 },
-                success: function () {}
+                success: function () { }
             });
         }
     },
@@ -514,8 +520,8 @@ var rescuePlugin = {
             ];
 
             if (allowedVhosts.findIndex(function (vhost) {
-                    return data.hostname.endsWith(vhost);
-                }) >= 0) {
+                return data.hostname.endsWith(vhost);
+            }) >= 0) {
                 window.onbeforeunload = null;
                 top.location.href = 'https://fuelrats.com/get-help';
             }
