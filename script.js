@@ -200,7 +200,7 @@ var rescuePlugin = {
 
         rescuePlugin.CommanderInfo.EO2 = document.querySelector('#EO2').checked ? 'NOT OK' : 'OK';
 
-        if (rescuePlugin.CommanderInfo.EO2 === 'NOT OK') {
+        if (((prefilledData && !prefilledData.submit) || !prefilledData) && rescuePlugin.CommanderInfo.EO2 === 'NOT OK') {
             alert('Please log out to the main menu immediately!\nDo not forget to write down your current position!');
         }
 
@@ -370,6 +370,16 @@ var rescuePlugin = {
         jQuery('.startup').hide();
 
         jQuery('.server_select button').on('click', rescuePlugin.SetCommanderInfo);
+
+        if(prefilledData) {
+            document.getElementById('system').value = prefilledData.system ?? '';
+            document.getElementById('platform').value = prefilledData.platform ?? '';
+            document.getElementById('server_select_nick').value = prefilledData.cmdr ?? '';
+            document.getElementById('EO2').checked = prefilledData.timer ?? false;
+            if(prefilledData.submit) {
+                jQuery('.server_select button').click();
+            }
+        }
     },
     GetInitialRescueInformation: function (rescueId, onLoad) {
         $.ajax({
@@ -679,6 +689,15 @@ var rescuePlugin = {
         }
     }
 };
+
+const urlParams = new URLSearchParams(window.location.search);
+const prefilledDataBase64 = urlParams.get('prefilledData');
+let prefilledData = false;
+if(prefilledDataBase64) {
+    try {
+        prefilledData = JSON.parse(atob(prefilledDataBase64));
+    } catch(e) {}
+}
 
 jQuery(document).ready(function () {
     var network = kiwi.components.Network();
