@@ -325,7 +325,7 @@ var rescuePlugin = {
     </td>
     <td>
         <label style="font-size: .9em;">
-            <input type="checkbox" id="Odyssey" style="width: auto;" value="Odyssey" />
+            <input type="checkbox" id="odyssey" style="width: auto;" value="Odyssey" />
             I am playing Odyssey
         </label>
     </td>
