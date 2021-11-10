@@ -851,11 +851,11 @@ var rescuePlugin = {
 };
 
 const urlParams = new URLSearchParams(window.location.search);
-const prefilledDataBase64 = urlParams.get("prefilledData");
+const prefilledDataString = urlParams.get("prefilledData");
 let prefilledData = false;
-if (prefilledDataBase64) {
+if (prefilledDataString) {
   try {
-    prefilledData = JSON.parse(atob(prefilledDataBase64));
+    prefilledData = JSON.parse(prefilledDataString);
   } catch (e) {}
 }
 
