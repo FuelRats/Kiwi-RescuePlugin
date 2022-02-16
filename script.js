@@ -490,7 +490,7 @@ var rescuePlugin = {
         prefilledData.odyssey ?? false;
       
       if (Date.now() - prefilledData.time < 3600000 && prefilledData.submit) {
-        Query(".server_select button").click();
+        jQuery(".server_select button").click();
       }
     }
   },
