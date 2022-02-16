@@ -488,8 +488,9 @@ var rescuePlugin = {
       document.getElementById("EO2").checked = prefilledData.timer ?? false;
       document.getElementById("odyssey").checked =
         prefilledData.odyssey ?? false;
-      if (prefilledData.submit) {
-        jQuery(".server_select button").click();
+      
+      if (Date.now() - prefilledData.time < 3600000 && prefilledData.submit) {
+        Query(".server_select button").click();
       }
     }
   },
