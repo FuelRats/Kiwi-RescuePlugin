@@ -326,9 +326,9 @@ var rescuePlugin = {
     <td>
         <label style="font-size: .9em;">
             <select id="odyssey" value="horizons3">
-              <option value="horizons3">Horizons (3.8)</option>
-              <option value="horizons4">Horizons (4.0)</option>
-              <option value="odyssey">Odyssey (4.0)</option>
+              <option value="Horizons 3.8">Horizons (3.8)</option>
+              <option value="Horizons 4.0">Horizons (4.0)</option>
+              <option value="Odyssey">Odyssey (4.0)</option>
             </select>
         </label>
     </td>
