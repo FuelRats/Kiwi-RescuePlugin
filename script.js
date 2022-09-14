@@ -321,12 +321,15 @@ var rescuePlugin = {
         odysseyItem = jQuery(
           `<tr class="odyssey">
     <td>
-        <label for="server_select_odyssey">Odyssey</label>
+        <label for="server_select_odyssey">Expansion</label>
     </td>
     <td>
         <label style="font-size: .9em;">
-            <input type="checkbox" id="odyssey" style="width: auto;" value="Odyssey" />
-            I am playing Odyssey
+            <select id="odyssey" value="horizons3">
+              <option value="horizons3">Horizons (3.8)</option>
+              <option value="horizons4">Horizons (4.0)</option>
+              <option value="odyssey">Odyssey (4.0)</option>
+            </select>
         </label>
     </td>
 </tr>`
@@ -486,8 +489,8 @@ var rescuePlugin = {
       document.getElementById("server_select_nick").value =
         prefilledData.cmdr ?? "";
       document.getElementById("EO2").checked = prefilledData.timer ?? false;
-      document.getElementById("odyssey").checked =
-        prefilledData.odyssey ?? false;
+      document.getElementById("odyssey").value =
+        prefilledData.odyssey ?? "horizons3";
       
       if (Date.now() - prefilledData.time < 3600000 && prefilledData.submit) {
         jQuery(".server_select button").click();
