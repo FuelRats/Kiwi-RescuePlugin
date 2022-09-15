@@ -195,10 +195,7 @@ var rescuePlugin = {
       return false;
     }
 
-    rescuePlugin.CommanderInfo.Odyssey = document.getElementById("odyssey")
-      .checked
-      ? true
-      : false;
+    rescuePlugin.CommanderInfo.Odyssey = document.getElementById("odyssey").value
 
     rescuePlugin.CommanderInfo.Platform = "unknown";
     var platItem = document.getElementById("platform");
