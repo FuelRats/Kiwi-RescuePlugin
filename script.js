@@ -323,7 +323,7 @@ var rescuePlugin = {
     </td>
     <td>
         <label style="font-size: .9em;">
-            <select id="odyssey" value="horizons3">
+            <select id="odyssey" value="Horizons 3.8">
               <option value="Horizons 3.8">Horizons (3.8)</option>
               <option value="Horizons 4.0">Horizons (4.0)</option>
               <option value="Odyssey">Odyssey (4.0)</option>
@@ -487,8 +487,12 @@ var rescuePlugin = {
       document.getElementById("server_select_nick").value =
         prefilledData.cmdr ?? "";
       document.getElementById("EO2").checked = prefilledData.timer ?? false;
-      document.getElementById("odyssey").value =
-        prefilledData.odyssey ?? "Horizons 3.8";
+      var expansionMap = {
+        "horizons3": "Horizons 3.8",
+        "horizons4": "Horizons 4.0",
+        "odyssey": "Odyssey"
+      }
+      document.getElementById("odyssey").value = prefilledData.odyssey ? expansionMap[prefilledData.odyssey] : "Horizons 3.8"
       
       if (Date.now() - prefilledData.time < 3600000 && prefilledData.submit) {
         jQuery(".server_select button").click();
