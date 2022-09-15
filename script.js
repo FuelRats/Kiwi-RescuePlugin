@@ -488,7 +488,7 @@ var rescuePlugin = {
         prefilledData.cmdr ?? "";
       document.getElementById("EO2").checked = prefilledData.timer ?? false;
       document.getElementById("odyssey").value =
-        prefilledData.odyssey ?? "horizons3";
+        prefilledData.odyssey ?? "Horizons 3.8";
       
       if (Date.now() - prefilledData.time < 3600000 && prefilledData.submit) {
         jQuery(".server_select button").click();
