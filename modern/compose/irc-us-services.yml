@@ -1,0 +1,28 @@
+# Services to merge into the irc.us (monterey) compose file at cutover, replacing the classic
+# `kiwi` service. A fragment, not a standalone stack: both must join that stack's default network
+# so the front nginx reaches `kiwi` by name and the gateway reaches the IRC server container
+# inside its webirc mask (172.18.0.0/16). Secrets go in the stack's .env:
+#   KIWI_GATEWAY_SECRET=<openssl rand -hex 32>
+#   KIWI_WEBIRC_PASSWORD=<password of the IRC server's 172.18.0.0/16 webirc block>
+# The web service keeps the name `kiwi`, so fleet-sec's monterey.kiwi asset follows it.
+services:
+  kiwi:
+    image: fr-kiwi-web@sha256:REPLACE_WITH_WEB_DIGEST
+    restart: unless-stopped
+    environment:
+      KIWI_GATEWAY: kiwi-gateway:7001
+    volumes:
+      - ./kiwi-ng/config.json:/usr/share/nginx/html/static/config.json:ro
+    depends_on:
+      - kiwi-gateway
+    # No published port: the front nginx proxies to kiwi:8080 on the compose network.
+
+  kiwi-gateway:
+    image: fr-kiwi-gateway@sha256:REPLACE_WITH_GATEWAY_DIGEST
+    restart: unless-stopped
+    environment:
+      KIWI_GATEWAY_SECRET: ${KIWI_GATEWAY_SECRET:?set in .env}
+      KIWI_WEBIRC_PASSWORD: ${KIWI_WEBIRC_PASSWORD:?set in .env}
+    volumes:
+      - ./kiwi-ng/gateway.conf:/etc/webircgateway/config.conf:ro
+    # Deliberately no depends_on on the IRC server service: `up` on these two must never touch it.
