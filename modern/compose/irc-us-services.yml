@@ -7,7 +7,7 @@
 # The web service keeps the name `kiwi`, so fleet-sec's monterey.kiwi asset follows it.
 services:
   kiwi:
-    image: fr-kiwi-web@sha256:REPLACE_WITH_WEB_DIGEST
+    image: fr-kiwi-web:3d507ce   # docker load'ed; check the image ID matches the release notes
     restart: unless-stopped
     environment:
       KIWI_GATEWAY: kiwi-gateway:7001
@@ -18,7 +18,7 @@ services:
     # No published port: the front nginx proxies to kiwi:8080 on the compose network.
 
   kiwi-gateway:
-    image: fr-kiwi-gateway@sha256:REPLACE_WITH_GATEWAY_DIGEST
+    image: fr-kiwi-gateway:3d507ce
     restart: unless-stopped
     environment:
       KIWI_GATEWAY_SECRET: ${KIWI_GATEWAY_SECRET:?set in .env}
