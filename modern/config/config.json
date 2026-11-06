@@ -1,0 +1,48 @@
+{
+    "windowTitle": "Fuel Rats: Kiwi IRC",
+    "startupScreen": "fuelrats",
+    "kiwiServer": "/webirc/kiwiirc/",
+    "restricted": true,
+    "theme": "FuelRats",
+    "themes": [
+        {
+            "name": "FuelRats",
+            "url": "static/themes/fuelrats"
+        },
+        {
+            "name": "Dark",
+            "url": "static/themes/dark"
+        },
+        {
+            "name": "Default",
+            "url": "static/themes/default"
+        }
+    ],
+    "warnOnExit": true,
+    "quitMessage": "FuelRats Web IRC - Provided by KiwiIRC",
+    "startupOptions": {
+        "server": "irc.fuelrats.com",
+        "port": 6697,
+        "tls": true,
+        "direct": false,
+        "channel": "#fuelrats",
+        "nick": "",
+        "gecos": "Client@FuelRats Web client",
+        "state_key": "",
+        "infoContent": "<p>Thank you for providing your information! We're ready to assist you on our IRC server, which you will reach by clicking the <strong>Start</strong> button.</p><p>Please enter your <strong>commander name</strong> exactly as it appears in game, so we know who you are.</p><p><strong>Note:</strong> If you're currently in multicrew, only the ship owner needs to call for a rescue. After you enter our IRC, you'll be asked to leave multicrew.</p>"
+    },
+    "embedly": {
+        "key": ""
+    },
+    "plugins": [],
+    "fuelrats": {
+        "announcerUrl": "https://announcer.fuelrats.com/client",
+        "apiUrl": "https://api.fuelrats.com",
+        "getHelpUrl": "https://fuelrats.com/get-help",
+        "networkName": "Fuel Rats",
+        "statusFeed": {
+            "enabled": false,
+            "pollIntervalMs": 5000
+        }
+    }
+}

@@ -1,0 +1,74 @@
+# kiwi-web: serves the built SPA and proxies /webirc/ to the webircgateway container.
+# Rendered by the nginx image's envsubst entrypoint; only ${KIWI_GATEWAY} and
+# ${NGINX_LOCAL_RESOLVERS} are substituted.
+#
+# TLS is terminated by the host's front nginx (clients.fuelrats.com vhost), which proxies here.
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 8080;
+    listen [::]:8080;
+    server_name _;
+    server_tokens off;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # The front proxy's X-Real-IP is the client address. Accept it only from private (container /
+    # host) ranges, then hand the gateway exactly one X-Forwarded-For entry: webircgateway trusts
+    # the FIRST entry, so passing on a client-supplied X-Forwarded-For would let clients spoof the
+    # IP that WEBIRC reports to the IRC server.
+    set_real_ip_from 127.0.0.0/8;
+    set_real_ip_from 10.0.0.0/8;
+    set_real_ip_from 172.16.0.0/12;
+    set_real_ip_from 192.168.0.0/16;
+    set_real_ip_from ::1/128;
+    set_real_ip_from fd00::/8;
+    real_ip_header X-Real-IP;
+
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+    set $kiwi_gateway ${KIWI_GATEWAY};
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Per-deployment config: never cached, so a config change needs no rebuild or cache purge.
+    location = /static/config.json {
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # Content-hashed bundles.
+    location ~ ^/static/(js|css)/ {
+        add_header Cache-Control "public, max-age=2592000, immutable" always;
+    }
+
+    # The gateway lists every connected client (nick, IP) on _status to "private" peers, and this
+    # proxy is one. Never expose it.
+    location = /webirc/_status {
+        return 404;
+    }
+
+    location /webirc/ {
+        proxy_pass http://$kiwi_gateway;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_buffering off;
+        proxy_read_timeout 1d;
+        proxy_send_timeout 1d;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
