@@ -1,0 +1,38 @@
+# Local test stack: kiwi-web + kiwi-gateway against the DEV IRC network, plus a mock announcer.
+# Everything binds to 127.0.0.1 only.
+#   KIWI_GATEWAY_SECRET=$(openssl rand -hex 32) docker compose -f modern/compose/docker-compose.dev.yml up -d
+#   open http://localhost:8098/
+name: kiwi-dev
+
+services:
+  kiwi:
+    image: ${KIWI_WEB_IMAGE:-fr-kiwi-web:local}
+    environment:
+      KIWI_GATEWAY: kiwi-gateway:7001
+    volumes:
+      - ../config/config.dev.json:/usr/share/nginx/html/static/config.json:ro
+    ports:
+      - "127.0.0.1:8098:8080"
+    depends_on:
+      - kiwi-gateway
+    restart: unless-stopped
+
+  kiwi-gateway:
+    image: ${KIWI_GATEWAY_IMAGE:-fr-kiwi-gateway:local}
+    environment:
+      KIWI_GATEWAY_SECRET: ${KIWI_GATEWAY_SECRET:?set KIWI_GATEWAY_SECRET}
+    volumes:
+      - ../gateway/config.dev.conf:/etc/webircgateway/config.conf:ro
+    restart: unless-stopped
+
+  mock-announcer:
+    image: python:3.12-slim
+    command: ["python", "-u", "/app/mock_announcer.py"]
+    volumes:
+      - ../tests/e2e/mock_announcer.py:/app/mock_announcer.py:ro
+      - announces:/data
+    ports:
+      - "127.0.0.1:8099:8099"
+
+volumes:
+  announces:

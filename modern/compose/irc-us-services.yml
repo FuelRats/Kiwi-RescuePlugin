@@ -1,0 +1,30 @@
+# Services to add to the irc.us (monterey) compose file for the blue-green cutover. They run next
+# to the classic `kiwi` service; the cutover is the front nginx's clients vhost switching its
+# proxy_pass from the classic kiwi (172.18.0.9:7777) to kiwi-ng:8080, and rollback is switching
+# it back. A fragment, not a standalone stack: both must join that stack's default network so the
+# front nginx reaches kiwi-ng by name and the gateway reaches the IRC server container inside its
+# webirc mask (172.18.0.0/16). Secrets go in the stack's .env:
+#   KIWI_GATEWAY_SECRET=<openssl rand -hex 32>
+#   KIWI_WEBIRC_PASSWORD=<password of the IRC server's 172.18.0.0/16 webirc block>
+# Start them with `docker compose up -d --no-deps kiwi-ng kiwi-gateway` only.
+services:
+  kiwi-ng:
+    image: fr-kiwi-web:3d507ce   # docker load'ed; check the image ID matches the runbook
+    restart: unless-stopped
+    environment:
+      KIWI_GATEWAY: kiwi-gateway:7001
+    volumes:
+      - ./kiwi-ng/config.json:/usr/share/nginx/html/static/config.json:ro
+    depends_on:
+      - kiwi-gateway
+    # No published port: the front nginx proxies to kiwi-ng:8080 on the compose network.
+
+  kiwi-gateway:
+    image: fr-kiwi-gateway:3d507ce
+    restart: unless-stopped
+    environment:
+      KIWI_GATEWAY_SECRET: ${KIWI_GATEWAY_SECRET:?set in .env}
+      KIWI_WEBIRC_PASSWORD: ${KIWI_WEBIRC_PASSWORD:?set in .env}
+    volumes:
+      - ./kiwi-ng/gateway.conf:/etc/webircgateway/config.conf:ro
+    # Deliberately no depends_on on the IRC server service: `up` on these two must never touch it.

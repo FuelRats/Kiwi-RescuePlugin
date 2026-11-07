@@ -1,0 +1,222 @@
+[
+    {
+        "input": "Jameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "CMDR Jameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "cmdr   Jameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "CMDRJameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "@Jameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "#Jameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "CMDR @Jameson",
+        "cmdrName": "Jameson",
+        "ircNick": "Jameson"
+    },
+    {
+        "input": "Commander Shepard",
+        "cmdrName": "Commander Shepard",
+        "ircNick": "Commander_Shepard"
+    },
+    {
+        "input": "Mr. Smith",
+        "cmdrName": "Mr. Smith",
+        "ircNick": "Mr_Smith"
+    },
+    {
+        "input": "J.R.R. Tolkien",
+        "cmdrName": "J.R.R. Tolkien",
+        "ircNick": "JRR_Tolkien"
+    },
+    {
+        "input": "Ünïcödé Ràt",
+        "cmdrName": "Ünïcödé Ràt",
+        "ircNick": "Unicode_Rat"
+    },
+    {
+        "input": "Ølstrøm Bjørnsen",
+        "cmdrName": "Ølstrøm Bjørnsen",
+        "ircNick": "Olstrom_Bjornsen"
+    },
+    {
+        "input": "Æsir",
+        "cmdrName": "Æsir",
+        "ircNick": "AEsir"
+    },
+    {
+        "input": "Владимир Путешественник",
+        "cmdrName": "Владимир Путешественник",
+        "ircNick": "Vladimir_Puteshestvennik"
+    },
+    {
+        "input": "Ёжик в тумане",
+        "cmdrName": "Ёжик в тумане",
+        "ircNick": "YOzhik_v_tumane"
+    },
+    {
+        "input": "Щука",
+        "cmdrName": "Щука",
+        "ircNick": "SCHuka"
+    },
+    {
+        "input": "Žluťoučký kůň",
+        "cmdrName": "Žluťoučký kůň",
+        "ircNick": "Zlutoucky_kun"
+    },
+    {
+        "input": "François Lefèvre",
+        "cmdrName": "François Lefèvre",
+        "ircNick": "Francois_Lefevre"
+    },
+    {
+        "input": "1234",
+        "cmdrName": "1234",
+        "ircNick": "c_1234"
+    },
+    {
+        "input": "42 Ratsalot",
+        "cmdrName": "42 Ratsalot",
+        "ircNick": "c_42_Ratsalot"
+    },
+    {
+        "input": "007 Bond",
+        "cmdrName": "007 Bond",
+        "ircNick": "c_007_Bond"
+    },
+    {
+        "input": "Rat[PC]",
+        "cmdrName": "Rat[PC]",
+        "ircNick": "Rat[PC]"
+    },
+    {
+        "input": "Rat{XB}",
+        "cmdrName": "Rat{XB}",
+        "ircNick": "Rat{XB}"
+    },
+    {
+        "input": "Rat^Caret",
+        "cmdrName": "Rat^Caret",
+        "ircNick": "Rat^Caret"
+    },
+    {
+        "input": "Rat|afk",
+        "cmdrName": "Rat|afk",
+        "ircNick": "Ratafk"
+    },
+    {
+        "input": "Rat-Dash",
+        "cmdrName": "Rat-Dash",
+        "ircNick": "RatDash"
+    },
+    {
+        "input": "Rat`Back",
+        "cmdrName": "Rat`Back",
+        "ircNick": "RatBack"
+    },
+    {
+        "input": "Rat\\Slash",
+        "cmdrName": "Rat\\Slash",
+        "ircNick": "RatSlash"
+    },
+    {
+        "input": "Rat´Acute",
+        "cmdrName": "Rat´Acute",
+        "ircNick": "RatAcute"
+    },
+    {
+        "input": "tabs\there",
+        "cmdrName": "tabs\there",
+        "ircNick": "tabs_here"
+    },
+    {
+        "input": "  padded  ",
+        "cmdrName": "padded",
+        "ircNick": "padded"
+    },
+    {
+        "input": "emoji 🚀 rat",
+        "cmdrName": "emoji 🚀 rat",
+        "ircNick": "emoji__rat"
+    },
+    {
+        "input": "日本語の名前",
+        "cmdrName": "日本語の名前",
+        "ircNick": ""
+    },
+    {
+        "input": "ThisIsAVeryLongCommanderNameThatGoesOnAndOn",
+        "cmdrName": "ThisIsAVeryLongCommanderNameThatGoesOnAndOn",
+        "ircNick": "ThisIsAVeryLongCommanderNameTh"
+    },
+    {
+        "input": "Exactly_Thirty_Characters_Long",
+        "cmdrName": "Exactly_Thirty_Characters_Long",
+        "ircNick": "Exactly_Thirty_Characters_Long"
+    },
+    {
+        "input": "a",
+        "cmdrName": "a",
+        "ircNick": "a"
+    },
+    {
+        "input": "Ελληνικά",
+        "cmdrName": "Ελληνικά",
+        "ircNick": ""
+    },
+    {
+        "input": "İstanbul Işık",
+        "cmdrName": "İstanbul Işık",
+        "ircNick": "Istanbul_Isik"
+    },
+    {
+        "input": "Straße",
+        "cmdrName": "Straße",
+        "ircNick": "Strase"
+    },
+    {
+        "input": "CMDR",
+        "cmdrName": "",
+        "ircNick": ""
+    },
+    {
+        "input": "cmdr cmdr",
+        "cmdrName": "cmdr",
+        "ircNick": "cmdr"
+    },
+    {
+        "input": "O'Brien",
+        "cmdrName": "O'Brien",
+        "ircNick": "OBrien"
+    },
+    {
+        "input": "Rat & Mouse",
+        "cmdrName": "Rat & Mouse",
+        "ircNick": "Rat__Mouse"
+    },
+    {
+        "input": "x_X",
+        "cmdrName": "x_X",
+        "ircNick": "x_X"
+    }
+]

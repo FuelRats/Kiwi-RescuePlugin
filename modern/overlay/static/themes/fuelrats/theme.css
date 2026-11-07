@@ -1,0 +1,21 @@
+/* Fuel Rats: the Dark theme with the fuelrats.com brand red (#d65050). */
+@import '../dark/theme.css';
+
+:root {
+    --brand-primary: #d65050;
+    --brand-primary-hover: #e57c7c;
+    --brand-link-normal: #e57c7c;
+    --brand-link--hover: #f0a8a8;
+    --comp-workspace-before-bg: var(--brand-primary);
+    --comp-header-option-active-bg: var(--brand-primary);
+    --comp-aboutbuffer-header-bg: var(--brand-primary);
+}
+
+.u-button-primary {
+    background-color: var(--brand-primary);
+    color: #fff;
+}
+
+.u-button-primary:hover {
+    background-color: var(--brand-primary-hover);
+}
