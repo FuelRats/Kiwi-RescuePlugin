@@ -128,7 +128,10 @@ export default class RatLogin {
 
     /**
      * Mint a one-time IRC token for the next connect. A 401 drops the bearer, so the login button
-     * shows again.
+     * shows again. A mint for a bearer this page no longer holds (a Log out, maybe followed by a
+     * new login, while it was minted) leaves the account, the error text and the current bearer as
+     * the log out or the new login left them: its token is discarded (the promise rejects with
+     * ERR_LOGGED_OUT), and its failure, a 401 included, only rejects.
      * @returns {Promise<{account: string, password: string}>} rejects with a LoginError
      */
     mint() {
@@ -143,13 +146,21 @@ export default class RatLogin {
         return mintSaslToken({ apiUrl: this.settings().apiUrl, bearer, fetchFn: this.fetchFn })
             .then((token) => {
                 this.store.minting = false;
+                if (this.bearer !== bearer) {
+                    let detail = 'the login changed while the IRC token was minted';
+                    this.log.info('IRC login token discarded: ' + detail);
+                    throw new LoginError(ERR_LOGGED_OUT, detail);
+                }
                 this.store.account = token.account;
                 this.setError(null);
                 return token;
             }, (err) => {
                 this.store.minting = false;
                 this.log.info('IRC login token not minted: ' + err.message);
-                if (err.kind === ERR_UNAUTHORIZED && this.bearer === bearer) {
+                if (this.bearer !== bearer) {
+                    throw err;
+                }
+                if (err.kind === ERR_UNAUTHORIZED) {
                     this.drop();
                 }
                 this.setError(err);

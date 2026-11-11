@@ -9,10 +9,14 @@
 //                                  503 IRC token minting not configured
 //   POST {apiUrl}/oauth2/revoke    form: client_id, token
 // A request that never gets a readable response (offline, DNS, or a CORS-blocked answer) rejects
-// with ERR_NETWORK.
+// with ERR_NETWORK, and so does one that is not answered, body included, within
+// REQUEST_TIMEOUT_MS: it is aborted, so a stalled connection never leaves a login or a mint
+// pending.
 import {
     ERR_FAILED, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNAUTHORIZED, ERR_UNAVAILABLE, LoginError
 } from './errors';
+
+export const REQUEST_TIMEOUT_MS = 15 * 1000;
 
 const FORM_HEADERS = { 'Content-Type': 'application/x-www-form-urlencoded' };
 
@@ -26,16 +30,38 @@ function endpoint(apiUrl, path) {
     return apiUrl.replace(/\/+$/, '') + path;
 }
 
-async function post(fetchFn, url, headers, body) {
+/**
+ * POST, then hand the response to `read`; both share one REQUEST_TIMEOUT_MS deadline.
+ * @param {Function} read async (response) => result
+ * @returns {Promise<*>} what `read` returns; rejects with a LoginError
+ */
+async function post(fetchFn, url, headers, body, read) {
+    let controller = new AbortController();
+    let timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
-        return await fetchFn(url, {
-            method: 'POST',
-            credentials: 'omit',
-            headers: { Accept: 'application/json', ...headers },
-            body,
-        });
+        let response;
+        try {
+            response = await fetchFn(url, {
+                method: 'POST',
+                credentials: 'omit',
+                headers: { Accept: 'application/json', ...headers },
+                body,
+                signal: controller.signal,
+            });
+        } catch (err) {
+            throw new LoginError(ERR_NETWORK, 'POST ' + url + ' failed: ' + err.message);
+        }
+        return await read(response);
     } catch (err) {
-        throw new LoginError(ERR_NETWORK, 'POST ' + url + ' failed: ' + err.message);
+        if (controller.signal.aborted) {
+            throw new LoginError(
+                ERR_NETWORK,
+                'POST ' + url + ' timed out after ' + (REQUEST_TIMEOUT_MS / 1000) + ' s'
+            );
+        }
+        throw err;
+    } finally {
+        clearTimeout(timer);
     }
 }
 
@@ -65,15 +91,16 @@ export async function exchangeCode(opts) {
         code_verifier: opts.verifier,
     });
     let url = endpoint(opts.apiUrl, '/oauth2/token');
-    let response = await post(opts.fetchFn, url, FORM_HEADERS, body.toString());
-    if (!response.ok) {
-        throw new LoginError(ERR_FAILED, 'token exchange answered HTTP ' + response.status);
-    }
-    let token = await readJson(response, 'token exchange');
-    if (!token || !isFilled(token.access_token)) {
-        throw new LoginError(ERR_FAILED, 'token exchange returned no access_token');
-    }
-    return token.access_token;
+    return post(opts.fetchFn, url, FORM_HEADERS, body.toString(), async(response) => {
+        if (!response.ok) {
+            throw new LoginError(ERR_FAILED, 'token exchange answered HTTP ' + response.status);
+        }
+        let token = await readJson(response, 'token exchange');
+        if (!token || !isFilled(token.access_token)) {
+            throw new LoginError(ERR_FAILED, 'token exchange returned no access_token');
+        }
+        return token.access_token;
+    });
 }
 
 /**
@@ -87,16 +114,17 @@ export async function mintSaslToken(opts) {
         'Content-Type': 'application/json',
     };
     let url = endpoint(opts.apiUrl, '/irc/sasl-token');
-    let response = await post(opts.fetchFn, url, headers, '{}');
-    if (!response.ok) {
-        let kind = MINT_STATUS_KINDS[response.status] || ERR_FAILED;
-        throw new LoginError(kind, 'sasl-token answered HTTP ' + response.status);
-    }
-    let token = await readJson(response, 'sasl-token');
-    if (!token || !isFilled(token.account) || !isFilled(token.password)) {
-        throw new LoginError(ERR_FAILED, 'sasl-token returned no account or password');
-    }
-    return { account: token.account, password: token.password };
+    return post(opts.fetchFn, url, headers, '{}', async(response) => {
+        if (!response.ok) {
+            let kind = MINT_STATUS_KINDS[response.status] || ERR_FAILED;
+            throw new LoginError(kind, 'sasl-token answered HTTP ' + response.status);
+        }
+        let token = await readJson(response, 'sasl-token');
+        if (!token || !isFilled(token.account) || !isFilled(token.password)) {
+            throw new LoginError(ERR_FAILED, 'sasl-token returned no account or password');
+        }
+        return { account: token.account, password: token.password };
+    });
 }
 
 /**
@@ -107,8 +135,9 @@ export async function mintSaslToken(opts) {
 export async function revokeToken(opts) {
     let body = new URLSearchParams({ client_id: opts.clientId, token: opts.bearer });
     let url = endpoint(opts.apiUrl, '/oauth2/revoke');
-    let response = await post(opts.fetchFn, url, FORM_HEADERS, body.toString());
-    if (!response.ok) {
-        throw new LoginError(ERR_FAILED, 'revoke answered HTTP ' + response.status);
-    }
+    return post(opts.fetchFn, url, FORM_HEADERS, body.toString(), (response) => {
+        if (!response.ok) {
+            throw new LoginError(ERR_FAILED, 'revoke answered HTTP ' + response.status);
+        }
+    });
 }
