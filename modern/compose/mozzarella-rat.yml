@@ -1,0 +1,34 @@
+# kiwi.fuelrats.com (rat client) on mozzarella: compose project kiwi-rat in /home/fuelrats/kiwi-rat,
+# next to config.json (from config/config.rat.json) and gateway.conf (from gateway/config.rat.conf).
+# The host nginx proxies /webirc/ straight to the gateway at 172.17.0.1:7003 and everything else
+# to the web container on 127.0.0.1:8099, so the web container's own /webirc/ proxy
+# (KIWI_GATEWAY) is unused in prod and redeploying the web container drops no IRC session.
+# The gateway runs on the host network so it reaches irc.de from 127.0.0.1 (its existing webirc
+# block) and listens only on docker0. Docker-published ports bypass the host firewall, so both
+# bind to private addresses only.
+# Secrets go in .env (mode 600): KIWI_GATEWAY_SECRET (random) and KIWI_WEBIRC_PASSWORD (the
+# password of irc.de's 127.0.0.1 webirc block).
+# <sha> is the commit the web image was built from; it is docker load'ed, so check the image ID.
+name: kiwi-rat
+
+services:
+  kiwi-rat-web:
+    image: fr-kiwi-web-rat:<sha>
+    restart: unless-stopped
+    network_mode: bridge
+    environment:
+      KIWI_GATEWAY: 172.17.0.1:7003
+    ports:
+      - "127.0.0.1:8099:8080"
+    volumes:
+      - ./config.json:/usr/share/nginx/html/static/config.json:ro
+
+  kiwi-rat-gateway:
+    image: fr-kiwi-gateway:3d507ce
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      KIWI_GATEWAY_SECRET: ${KIWI_GATEWAY_SECRET:?set in .env}
+      KIWI_WEBIRC_PASSWORD: ${KIWI_WEBIRC_PASSWORD:?set in .env}
+    volumes:
+      - ./gateway.conf:/etc/webircgateway/config.conf:ro
