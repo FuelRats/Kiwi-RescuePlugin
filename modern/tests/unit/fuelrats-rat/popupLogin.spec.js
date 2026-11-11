@@ -75,6 +75,13 @@ describe('readCallbackMessage', () => {
             .toBeNull();
     });
 
+    it('ignores an error answer without our state', () => {
+        expect(readCallbackMessage(answer(popup, { error: 'access_denied', state: '' }), expected))
+            .toBeNull();
+        expect(readCallbackMessage(answer(popup, { error: 'access_denied', state: 'other' }), expected))
+            .toBeNull();
+    });
+
     it('rejects a missing code', () => {
         expect(readCallbackMessage(answer(popup, {}), expected)).toBeNull();
         expect(readCallbackMessage(answer(popup, { code: '' }), expected)).toBeNull();
@@ -161,6 +168,30 @@ describe('runLoginPopup', () => {
         popup.closed = true;
         jest.advanceTimersByTime(CLOSED_POLL_MS * 2);
         await expect(pending).rejects.toMatchObject({ kind: ERR_POPUP_CLOSED });
+        expect(win.listenerCount()).toBe(0);
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('still takes the answer of a callback page that closed itself right after posting', async() => {
+        let popup = fakePopup();
+        let win = fakeWindow(popup);
+        let pending = runLoginPopup(win, Promise.resolve('https://fuelrats.com/authorize'), STATE);
+        popup.closed = true;
+        jest.advanceTimersByTime(CLOSED_POLL_MS);
+        win.dispatch(answer(popup, { code: 'c0de' }));
+        await expect(pending).resolves.toBe('c0de');
+        expect(win.listenerCount()).toBe(0);
+        expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('closes the popup and rejects when the authorize URL cannot be built', async() => {
+        let popup = fakePopup();
+        let win = fakeWindow(popup);
+        let err = new Error('SubtleCrypto digest failed');
+        let pending = runLoginPopup(win, Promise.reject(err), STATE);
+        await expect(pending).rejects.toBe(err);
+        expect(popup.close).toHaveBeenCalled();
+        expect(popup.location.replace).not.toHaveBeenCalled();
         expect(win.listenerCount()).toBe(0);
         expect(jest.getTimerCount()).toBe(0);
     });

@@ -83,6 +83,26 @@ describe('connect wrapper', () => {
         expect(onMintError).toHaveBeenCalledWith(network, err);
     });
 
+    it('does not connect when the nick and password path was chosen during the mint', async() => {
+        let network = fakeNetwork();
+        let useLogin = true;
+        let answerMint = null;
+        let mint = jest.fn(() => new Promise((resolve) => {
+            answerMint = resolve;
+        }));
+        let onMintError = jest.fn();
+        wrapConnect(network, { useLogin: () => useLogin, mint, onMintError });
+
+        let connecting = network.ircClient.connect();
+        useLogin = false;
+        answerMint({ account: 'Jameson', password: 'frk1:1:00' });
+
+        await expect(connecting).resolves.toBe(false);
+        expect(network.sent).toHaveLength(0);
+        expect(network.password).toBe('');
+        expect(onMintError).not.toHaveBeenCalled();
+    });
+
     it('blanks the password even when Kiwi\'s connect throws', async() => {
         let network = fakeNetwork();
         network.ircClient.connect = jest.fn(() => {

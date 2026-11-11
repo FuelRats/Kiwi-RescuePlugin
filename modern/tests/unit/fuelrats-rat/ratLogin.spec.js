@@ -1,6 +1,8 @@
 import { webcrypto } from 'crypto';
+import { wrapConnect } from '@/plugins/fuelrats-rat/lib/connectWrapper';
 import {
-    ERR_LOGGED_OUT, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNAUTHORIZED, ERR_UNAVAILABLE
+    ERR_DENIED, ERR_FAILED, ERR_LOGGED_OUT, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNAUTHORIZED,
+    ERR_UNAVAILABLE
 } from '@/plugins/fuelrats-rat/lib/errors';
 import { MESSAGES } from '@/plugins/fuelrats-rat/lib/messages';
 import { s256Challenge } from '@/plugins/fuelrats-rat/lib/pkce';
@@ -17,6 +19,7 @@ const CONFIG = {
     redirectUri: ORIGIN + '/static/fuelrats-rat/callback.html',
 };
 const BEARER = 'Xq7Lm2Rt9Vb4Nc8Kp3Wd6Hf1Js5Gz0Ay';
+const NEXT_BEARER = 'Tg5Ub8Ye1Rc3Wm6Qn9Lz2Fk4Hs7Dv0Px';
 const IRC_TOKEN = 'frk1:1782893400:' + '3f'.repeat(32);
 
 function response(status, body) {
@@ -27,8 +30,7 @@ function response(status, body) {
     };
 }
 
-function fakeWindow() {
-    let listeners = new Set();
+function fakePopup() {
     let popup = {
         closed: false,
         location: { replace: jest.fn() },
@@ -36,10 +38,19 @@ function fakeWindow() {
             popup.closed = true;
         }),
     };
-    return {
-        popup,
+    return popup;
+}
+
+// win.popup is the popup of the latest login attempt.
+function fakeWindow() {
+    let listeners = new Set();
+    let win = {
+        popup: null,
         location: { origin: ORIGIN, hostname: 'kiwi.fuelrats.com' },
-        open: jest.fn(() => popup),
+        open: jest.fn(() => {
+            win.popup = fakePopup();
+            return win.popup;
+        }),
         addEventListener: (type, fn) => listeners.add(fn),
         removeEventListener: (type, fn) => listeners.delete(fn),
         setInterval: (fn, ms) => setInterval(fn, ms),
@@ -48,6 +59,7 @@ function fakeWindow() {
         clearTimeout: (id) => clearTimeout(id),
         dispatch: (event) => listeners.forEach((fn) => fn(event)),
     };
+    return win;
 }
 
 function setup(config = CONFIG) {
@@ -85,8 +97,8 @@ async function authorizeUrlOf(win, turns = 50) {
     return authorizeUrlOf(win, turns - 1);
 }
 
-async function logIn(ctx) {
-    ctx.fetchFn.mockResolvedValueOnce(response(200, { access_token: BEARER, token_type: 'bearer' }));
+async function logIn(ctx, bearer = BEARER) {
+    ctx.fetchFn.mockResolvedValueOnce(response(200, { access_token: bearer, token_type: 'bearer' }));
     let pending = ctx.ratLogin.login();
     let url = await authorizeUrlOf(ctx.win);
     ctx.win.dispatch({
@@ -96,6 +108,28 @@ async function logIn(ctx) {
     });
     await expect(pending).resolves.toBe(true);
     return url;
+}
+
+// A mint request the test answers later: returns the function that answers it.
+function pendingMint(ctx) {
+    let answerMint = null;
+    ctx.fetchFn.mockReturnValueOnce(new Promise((resolve) => {
+        answerMint = resolve;
+    }));
+    return (res) => answerMint(res);
+}
+
+// A network wrapped like the plugin wraps it, whose Kiwi connect only records the call.
+function wrappedNetwork(ctx) {
+    let kiwiConnect = jest.fn();
+    let network = { connection: { nick: 'Guest42' }, password: '', ircClient: { connect: kiwiConnect } };
+    let onMintError = jest.fn();
+    wrapConnect(network, {
+        useLogin: () => ctx.store.useLogin,
+        mint: () => ctx.ratLogin.mint(),
+        onMintError,
+    });
+    return { network, kiwiConnect, onMintError };
 }
 
 describe('rat login', () => {
@@ -151,6 +185,63 @@ describe('rat login', () => {
         await expect(ctx.ratLogin.login()).resolves.toBe(false);
         expect(ctx.store.status).toBe(STATUS_LOGGED_OUT);
         expect(ctx.store.error).toBe('Allow pop-ups for kiwi.fuelrats.com, then try again.');
+    });
+
+    it('says the login was cancelled when the website answers with an error and our state', async() => {
+        let ctx = setup();
+        let pending = ctx.ratLogin.login();
+        let url = await authorizeUrlOf(ctx.win);
+        ctx.win.dispatch({
+            origin: ORIGIN,
+            source: ctx.win.popup,
+            data: {
+                type: CALLBACK_MESSAGE_TYPE,
+                code: '',
+                state: url.searchParams.get('state'),
+                error: 'access_denied',
+            },
+        });
+
+        await expect(pending).resolves.toBe(false);
+        expect(ctx.win.popup.close).toHaveBeenCalled();
+        expect(ctx.fetchFn).not.toHaveBeenCalled();
+        expect(ctx.store.status).toBe(STATUS_LOGGED_OUT);
+        expect(ctx.store.error).toBe(MESSAGES[ERR_DENIED]);
+    });
+
+    it('fails the login when the code exchange fails', async() => {
+        let ctx = setup();
+        ctx.fetchFn.mockResolvedValueOnce(response(400, { error: 'invalid_grant' }));
+        let pending = ctx.ratLogin.login();
+        let url = await authorizeUrlOf(ctx.win);
+        ctx.win.dispatch({
+            origin: ORIGIN,
+            source: ctx.win.popup,
+            data: { type: CALLBACK_MESSAGE_TYPE, code: 'c0de', state: url.searchParams.get('state') },
+        });
+
+        await expect(pending).resolves.toBe(false);
+        expect(ctx.ratLogin.loggedIn).toBe(false);
+        expect(ctx.store.status).toBe(STATUS_LOGGED_OUT);
+        expect(ctx.store.error).toBe(MESSAGES[ERR_FAILED]);
+    });
+
+    it('opens one popup when the login is started twice', async() => {
+        let ctx = setup();
+        let first = ctx.ratLogin.login();
+        let second = ctx.ratLogin.login();
+        expect(ctx.win.open).toHaveBeenCalledTimes(1);
+        await expect(second).resolves.toBe(false);
+
+        ctx.fetchFn.mockResolvedValueOnce(response(200, { access_token: BEARER, token_type: 'bearer' }));
+        let url = await authorizeUrlOf(ctx.win);
+        ctx.win.dispatch({
+            origin: ORIGIN,
+            source: ctx.win.popup,
+            data: { type: CALLBACK_MESSAGE_TYPE, code: 'c0de', state: url.searchParams.get('state') },
+        });
+        await expect(first).resolves.toBe(true);
+        expect(ctx.store.status).toBe(STATUS_LOGGED_IN);
     });
 
     it('mints an IRC login with the bearer', async() => {
@@ -218,6 +309,47 @@ describe('rat login', () => {
         expect(ctx.store.error).toBe(MESSAGES[ERR_NETWORK]);
     });
 
+    it.each([403, 500])('keeps the bearer on a mint status it does not expect (%i)', async(status) => {
+        let ctx = setup();
+        await logIn(ctx);
+        ctx.fetchFn.mockResolvedValueOnce(response(status, { errors: [] }));
+
+        await expect(ctx.ratLogin.mint()).rejects.toMatchObject({ kind: ERR_FAILED });
+        expect(ctx.ratLogin.loggedIn).toBe(true);
+        expect(ctx.store.status).toBe(STATUS_LOGGED_IN);
+        expect(ctx.store.error).toBe(MESSAGES[ERR_FAILED]);
+    });
+
+    it('leaves a new login alone when the mint of the previous one answers 401', async() => {
+        let ctx = setup();
+        await logIn(ctx);
+        let answerMint = pendingMint(ctx);
+        let minting = ctx.ratLogin.mint();
+
+        ctx.fetchFn.mockResolvedValueOnce(response(200, {}));
+        await ctx.ratLogin.logout();
+        await logIn(ctx, NEXT_BEARER);
+        ctx.fetchFn.mockResolvedValueOnce(response(200, {
+            account: 'Jameson', password: IRC_TOKEN, expiresIn: 60,
+        }));
+        await ctx.ratLogin.mint();
+        answerMint(response(401, { errors: [] }));
+
+        await expect(minting).rejects.toMatchObject({ kind: ERR_UNAUTHORIZED });
+        expect(ctx.ratLogin.loggedIn).toBe(true);
+        expect(ctx.store.status).toBe(STATUS_LOGGED_IN);
+        expect(ctx.store.account).toBe('Jameson');
+        expect(ctx.store.error).toBe('');
+        expect(ctx.store.errorLink).toBe('');
+
+        ctx.fetchFn.mockResolvedValueOnce(response(200, {
+            account: 'Jameson', password: IRC_TOKEN, expiresIn: 60,
+        }));
+        await ctx.ratLogin.mint();
+        let [, init] = ctx.fetchFn.mock.calls[ctx.fetchFn.mock.calls.length - 1];
+        expect(init.headers.Authorization).toBe('Bearer ' + NEXT_BEARER);
+    });
+
     it('revokes the bearer on log out', async() => {
         let ctx = setup();
         await logIn(ctx);
@@ -243,5 +375,76 @@ describe('rat login', () => {
         await ctx.ratLogin.logout();
         expect(ctx.ratLogin.loggedIn).toBe(false);
         expect(ctx.log.error).toHaveBeenCalled();
+    });
+
+    it('discards a token minted across a log out and does not connect', async() => {
+        let ctx = setup();
+        await logIn(ctx);
+        ctx.store.useLogin = true;
+        let { network, kiwiConnect, onMintError } = wrappedNetwork(ctx);
+        let answerMint = pendingMint(ctx);
+        let connecting = network.ircClient.connect();
+        expect(ctx.store.minting).toBe(true);
+
+        ctx.fetchFn.mockResolvedValueOnce(response(200, {}));
+        await ctx.ratLogin.logout();
+        answerMint(response(200, { account: 'Jameson', password: IRC_TOKEN, expiresIn: 60 }));
+
+        await expect(connecting).resolves.toBe(false);
+        expect(kiwiConnect).not.toHaveBeenCalled();
+        expect(network.password).toBe('');
+        expect(network.connection.nick).toBe('Guest42');
+        expect(onMintError).toHaveBeenCalledWith(network, expect.objectContaining({
+            kind: ERR_LOGGED_OUT,
+        }));
+        expect(ctx.ratLogin.loggedIn).toBe(false);
+        expect(ctx.store.minting).toBe(false);
+        expect(ctx.store.account).toBe('');
+        expect(ctx.store.error).toBe('');
+    });
+
+    it('says nothing about an expired login when a mint across a log out answers 401', async() => {
+        let ctx = setup();
+        await logIn(ctx);
+        ctx.store.useLogin = true;
+        let { network, kiwiConnect, onMintError } = wrappedNetwork(ctx);
+        let answerMint = pendingMint(ctx);
+        let connecting = network.ircClient.connect();
+
+        ctx.fetchFn.mockResolvedValueOnce(response(200, {}));
+        await ctx.ratLogin.logout();
+        answerMint(response(401, { errors: [] }));
+
+        await expect(connecting).resolves.toBe(false);
+        expect(kiwiConnect).not.toHaveBeenCalled();
+        expect(network.password).toBe('');
+        expect(onMintError).toHaveBeenCalledWith(network, expect.objectContaining({
+            kind: ERR_UNAUTHORIZED,
+        }));
+        expect(ctx.store.status).toBe(STATUS_LOGGED_OUT);
+        expect(ctx.store.minting).toBe(false);
+        expect(ctx.store.error).toBe('');
+        expect(ctx.store.errorLink).toBe('');
+    });
+
+    it('discards a token minted for the previous login after a new one', async() => {
+        let ctx = setup();
+        await logIn(ctx);
+        ctx.store.useLogin = true;
+        let { network, kiwiConnect } = wrappedNetwork(ctx);
+        let answerMint = pendingMint(ctx);
+        let connecting = network.ircClient.connect();
+
+        ctx.fetchFn.mockResolvedValueOnce(response(200, {}));
+        await ctx.ratLogin.logout();
+        await logIn(ctx, NEXT_BEARER);
+        answerMint(response(200, { account: 'Jameson', password: IRC_TOKEN, expiresIn: 60 }));
+
+        await expect(connecting).resolves.toBe(false);
+        expect(kiwiConnect).not.toHaveBeenCalled();
+        expect(network.password).toBe('');
+        expect(ctx.ratLogin.loggedIn).toBe(true);
+        expect(ctx.store.account).toBe('');
+        expect(ctx.store.error).toBe('');
     });
 });
