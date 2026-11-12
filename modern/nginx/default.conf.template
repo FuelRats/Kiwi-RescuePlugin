@@ -49,6 +49,12 @@ server {
         add_header Cache-Control "public, max-age=2592000, immutable" always;
     }
 
+    # The rat login's callback page and its script are served as they are, without a content hash,
+    # so browsers revalidate them on every load, like index.html.
+    location ^~ /static/fuelrats-rat/ {
+        add_header Cache-Control "no-cache" always;
+    }
+
     # The gateway lists every connected client (nick, IP) on _status to "private" peers, and this
     # proxy is one. Never expose it.
     location = /webirc/_status {

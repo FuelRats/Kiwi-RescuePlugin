@@ -1,0 +1,63 @@
+{
+    "windowTitle": "Fuel Rats Kiwi IRC - The web IRC client",
+    "startupScreen": "fuelratsRat",
+    "kiwiServer": "/webirc/kiwiirc/",
+    "restricted": true,
+    "theme": "Dark",
+    "themes": [
+        {
+            "name": "FuelRats",
+            "url": "static/themes/fuelrats"
+        },
+        {
+            "name": "Default",
+            "url": "static/themes/default"
+        },
+        {
+            "name": "Dark",
+            "url": "static/themes/dark"
+        },
+        {
+            "name": "Coffee",
+            "url": "static/themes/coffee"
+        },
+        {
+            "name": "GrayFox",
+            "url": "static/themes/grayfox"
+        },
+        {
+            "name": "Nightswatch",
+            "url": "static/themes/nightswatch"
+        },
+        {
+            "name": "Osprey",
+            "url": "static/themes/osprey"
+        },
+        {
+            "name": "Radioactive",
+            "url": "static/themes/radioactive"
+        },
+        {
+            "name": "Sky",
+            "url": "static/themes/sky"
+        }
+    ],
+    "disconnectOnSaslFail": true,
+    "autoReconnect": false,
+    "startupOptions": {
+        "server": "irc.fuelrats.dev",
+        "port": 6697,
+        "tls": true,
+        "direct": false,
+        "channel": "#ratchat",
+        "nick": "",
+        "state_key": ""
+    },
+    "plugins": [],
+    "fuelratsRat": {
+        "websiteUrl": "https://fuelrats.dev",
+        "apiUrl": "https://dev.api.fuelrats.com",
+        "clientId": "",
+        "redirectUri": "http://localhost:8099/static/fuelrats-rat/callback.html"
+    }
+}

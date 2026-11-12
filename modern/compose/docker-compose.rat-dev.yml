@@ -2,7 +2,8 @@
 # network. Everything binds to 127.0.0.1 only. Unlike prod (mozzarella-rat.yml), the browser
 # reaches the gateway through the web container's /webirc/ proxy.
 # Conflicts with docker-compose.dev.yml, whose mock announcer also publishes 127.0.0.1:8099, so
-# don't run both stacks at once.
+# don't run both stacks at once. Open it as localhost, not 127.0.0.1: "Log in with Fuel Rats" is
+# offered only on the origin of the dev OAuth callback in config.rat-dev.json.
 #   docker build -f modern/Dockerfile --build-arg KIWI_VARIANT=rat -t fr-kiwi-web-rat:local modern/
 #   KIWI_GATEWAY_SECRET=$(openssl rand -hex 32) docker compose -f modern/compose/docker-compose.rat-dev.yml up -d
 #   open http://localhost:8099/
@@ -14,7 +15,7 @@ services:
     environment:
       KIWI_GATEWAY: kiwi-rat-gateway:7001
     volumes:
-      - ../config/config.rat.json:/usr/share/nginx/html/static/config.json:ro
+      - ../config/config.rat-dev.json:/usr/share/nginx/html/static/config.json:ro
     ports:
       - "127.0.0.1:8099:8080"
     depends_on:

@@ -1,6 +1,6 @@
 {
     "windowTitle": "Fuel Rats Kiwi IRC - The web IRC client",
-    "startupScreen": "welcome",
+    "startupScreen": "fuelratsRat",
     "kiwiServer": "/webirc/kiwiirc/",
     "restricted": true,
     "theme": "Dark",
@@ -53,5 +53,11 @@
         "nick": "",
         "state_key": ""
     },
-    "plugins": []
+    "plugins": [],
+    "fuelratsRat": {
+        "websiteUrl": "https://fuelrats.com",
+        "apiUrl": "https://api.fuelrats.com",
+        "clientId": "",
+        "redirectUri": "https://kiwi.fuelrats.com/static/fuelrats-rat/callback.html"
+    }
 }
