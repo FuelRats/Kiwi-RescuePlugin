@@ -2,11 +2,12 @@ import { webcrypto } from 'crypto';
 import { wrapConnect } from '@/plugins/fuelrats-rat/lib/connectWrapper';
 import {
     ERR_DENIED, ERR_FAILED, ERR_LOGGED_OUT, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNAUTHORIZED,
-    ERR_UNAVAILABLE
+    ERR_UNAVAILABLE, ERR_UNVERIFIED
 } from '@/plugins/fuelrats-rat/lib/errors';
 import { MESSAGES } from '@/plugins/fuelrats-rat/lib/messages';
 import { s256Challenge } from '@/plugins/fuelrats-rat/lib/pkce';
 import { CALLBACK_MESSAGE_TYPE } from '@/plugins/fuelrats-rat/lib/popupLogin';
+import { REQUEST_TIMEOUT_MS } from '@/plugins/fuelrats-rat/lib/ratApi';
 import RatLogin, {
     emptyLoginState, loginConfigured, STATUS_LOGGED_IN, STATUS_LOGGED_OUT
 } from '@/plugins/fuelrats-rat/lib/ratLogin';
@@ -119,6 +120,19 @@ function pendingMint(ctx) {
     return (res) => answerMint(res);
 }
 
+// A mint request that never gets an answer: it fails when the test calls the returned function,
+// or, like a stalled browser request, when it is aborted.
+function failingMint(ctx) {
+    let failMint = null;
+    ctx.fetchFn.mockImplementationOnce((url, init) => new Promise((resolve, reject) => {
+        failMint = reject;
+        init.signal.addEventListener('abort', () => {
+            reject(new Error('The user aborted a request.'));
+        });
+    }));
+    return (err) => failMint(err);
+}
+
 // A network wrapped like the plugin wraps it, whose Kiwi connect only records the call.
 function wrappedNetwork(ctx) {
     let kiwiConnect = jest.fn();
@@ -209,6 +223,29 @@ describe('rat login', () => {
         expect(ctx.store.error).toBe(MESSAGES[ERR_DENIED]);
     });
 
+    it('says the login failed when the website answers with another error and our state', async() => {
+        let ctx = setup();
+        let pending = ctx.ratLogin.login();
+        let url = await authorizeUrlOf(ctx.win);
+        ctx.win.dispatch({
+            origin: ORIGIN,
+            source: ctx.win.popup,
+            data: {
+                type: CALLBACK_MESSAGE_TYPE,
+                code: '',
+                state: url.searchParams.get('state'),
+                error: 'invalid_scope',
+            },
+        });
+
+        await expect(pending).resolves.toBe(false);
+        expect(ctx.win.popup.close).toHaveBeenCalled();
+        expect(ctx.fetchFn).not.toHaveBeenCalled();
+        expect(ctx.store.status).toBe(STATUS_LOGGED_OUT);
+        expect(ctx.store.error).toBe(MESSAGES[ERR_FAILED]);
+        expect(ctx.log.info).toHaveBeenCalledWith('Fuel Rats login failed: failed: invalid_scope');
+    });
+
     it('fails the login when the code exchange fails', async() => {
         let ctx = setup();
         ctx.fetchFn.mockResolvedValueOnce(response(400, { error: 'invalid_grant' }));
@@ -285,6 +322,22 @@ describe('rat login', () => {
         await expect(ctx.ratLogin.mint()).rejects.toMatchObject({ kind: ERR_NO_ACCOUNT });
         expect(ctx.ratLogin.loggedIn).toBe(true);
         expect(ctx.store.error).toBe(MESSAGES[ERR_NO_ACCOUNT]);
+        expect(ctx.store.errorLink).toBe('https://fuelrats.com/profile/overview');
+    });
+
+    it('asks to verify the email and links the profile when it is unverified (400 /email)', async() => {
+        let ctx = setup();
+        await logIn(ctx);
+        ctx.fetchFn.mockResolvedValueOnce(response(400, {
+            errors: [{ status: 'bad_request', source: { pointer: '/email' } }],
+        }));
+
+        await expect(ctx.ratLogin.mint()).rejects.toMatchObject({ kind: ERR_UNVERIFIED });
+        expect(ctx.ratLogin.loggedIn).toBe(true);
+        expect(ctx.store.status).toBe(STATUS_LOGGED_IN);
+        expect(ctx.store.error)
+            .toBe('Verify the email address of your Fuel Rats account, then try again.');
+        expect(ctx.store.error).toBe(MESSAGES[ERR_UNVERIFIED]);
         expect(ctx.store.errorLink).toBe('https://fuelrats.com/profile/overview');
     });
 
@@ -425,6 +478,52 @@ describe('rat login', () => {
         expect(ctx.store.minting).toBe(false);
         expect(ctx.store.error).toBe('');
         expect(ctx.store.errorLink).toBe('');
+    });
+
+    describe('a mint across a log out that cannot reach the API', () => {
+        // The login itself needs real timers (Web Crypto, nextTurn); each test fakes them after it.
+        afterEach(() => {
+            jest.useRealTimers();
+        });
+
+        it.each([
+            [
+                'fails like an unreachable API',
+                (failMint) => failMint(new TypeError('Failed to fetch')),
+                'network: POST https://api.fuelrats.com/irc/sasl-token failed: Failed to fetch',
+            ],
+            [
+                'times out',
+                () => jest.advanceTimersByTime(REQUEST_TIMEOUT_MS),
+                'network: POST https://api.fuelrats.com/irc/sasl-token timed out after 15 s',
+            ],
+        ])('says nothing and does not connect when it %s', async(how, endMint, message) => {
+            let ctx = setup();
+            await logIn(ctx);
+            ctx.store.useLogin = true;
+            let { network, kiwiConnect, onMintError } = wrappedNetwork(ctx);
+            jest.useFakeTimers();
+            let failMint = failingMint(ctx);
+            let connecting = network.ircClient.connect();
+            expect(ctx.store.minting).toBe(true);
+
+            ctx.fetchFn.mockResolvedValueOnce(response(200, {}));
+            await ctx.ratLogin.logout();
+            endMint(failMint);
+
+            await expect(connecting).resolves.toBe(false);
+            expect(kiwiConnect).not.toHaveBeenCalled();
+            expect(network.password).toBe('');
+            expect(network.connection.nick).toBe('Guest42');
+            expect(onMintError).toHaveBeenCalledWith(network, expect.objectContaining({
+                kind: ERR_NETWORK,
+                message,
+            }));
+            expect(ctx.store.status).toBe(STATUS_LOGGED_OUT);
+            expect(ctx.store.minting).toBe(false);
+            expect(ctx.store.error).toBe('');
+            expect(ctx.store.errorLink).toBe('');
+        });
     });
 
     it('discards a token minted for the previous login after a new one', async() => {

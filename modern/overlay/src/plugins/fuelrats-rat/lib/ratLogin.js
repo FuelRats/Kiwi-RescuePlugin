@@ -6,7 +6,8 @@
 // also the website's consent memory, so revoking on unload would ask for consent on every visit.
 // Tokens of public clients expire after 12 hours anyway.
 import {
-    ERR_FAILED, ERR_LOGGED_OUT, ERR_NO_ACCOUNT, ERR_POPUP_BLOCKED, ERR_UNAUTHORIZED, LoginError
+    ERR_FAILED, ERR_LOGGED_OUT, ERR_NO_ACCOUNT, ERR_POPUP_BLOCKED, ERR_UNAUTHORIZED, ERR_UNVERIFIED,
+    LoginError
 } from './errors';
 import { MESSAGES } from './messages';
 import { randomToken, s256Challenge } from './pkce';
@@ -17,8 +18,12 @@ export const STATUS_LOGGED_OUT = 'logged-out';
 export const STATUS_LOGGING_IN = 'logging-in';
 export const STATUS_LOGGED_IN = 'logged-in';
 
-// The website page whose nicknames panel registers an IRC nick (and so the Anope account).
+// The website page whose nicknames panel registers an IRC nick (and so the Anope account), and
+// which offers to resend the verification email of an unverified account.
 export const PROFILE_PATH = '/profile/overview';
+
+// The failures the profile page fixes; their message comes with a link to it.
+const PROFILE_LINK_KINDS = [ERR_NO_ACCOUNT, ERR_UNVERIFIED];
 
 /**
  * The reactive part of the login state (see ../store.js). It never holds the bearer.
@@ -210,7 +215,7 @@ export default class RatLogin {
         } else {
             this.store.error = MESSAGES[ERR_FAILED];
         }
-        this.store.errorLink = err.kind === ERR_NO_ACCOUNT ?
+        this.store.errorLink = PROFILE_LINK_KINDS.includes(err.kind) ?
             this.settings().websiteUrl.replace(/\/+$/, '') + PROFILE_PATH :
             '';
     }

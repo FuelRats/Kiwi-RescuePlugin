@@ -5,7 +5,9 @@
 //                                  200 { access_token, token_type }
 //   POST {apiUrl}/irc/sasl-token   Authorization: Bearer <access token>
 //                                  200 { account, password: "frk1:<ts>:<hex>", expiresIn: 60 }
-//                                  400 no Anope account, 401 bearer invalid or expired,
+//                                  400 JSON:API error: errors[0].source.pointer "/email" if the
+//                                  website email is unverified, else no Anope account;
+//                                  401 bearer invalid or expired,
 //                                  503 IRC token minting not configured
 //   POST {apiUrl}/oauth2/revoke    form: client_id, token
 // A request that never gets a readable response (offline, DNS, or a CORS-blocked answer) rejects
@@ -13,7 +15,8 @@
 // REQUEST_TIMEOUT_MS: it is aborted, so a stalled connection never leaves a login or a mint
 // pending.
 import {
-    ERR_FAILED, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNAUTHORIZED, ERR_UNAVAILABLE, LoginError
+    ERR_FAILED, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNAUTHORIZED, ERR_UNAVAILABLE, ERR_UNVERIFIED,
+    LoginError
 } from './errors';
 
 export const REQUEST_TIMEOUT_MS = 15 * 1000;
@@ -25,6 +28,9 @@ const MINT_STATUS_KINDS = {
     401: ERR_UNAUTHORIZED,
     503: ERR_UNAVAILABLE,
 };
+
+// The source pointer of the mint's 400 for a website account whose email is unverified.
+const UNVERIFIED_EMAIL_POINTER = '/email';
 
 function endpoint(apiUrl, path) {
     return apiUrl.replace(/\/+$/, '') + path;
@@ -78,6 +84,29 @@ function isFilled(value) {
 }
 
 /**
+ * The failure kind of a mint answered with an error status. Both refusals of an account are 400s;
+ * only the JSON:API error body tells an unverified website email from a missing Anope account.
+ * A 400 whose body is not JSON, or lacks that pointer, counts as the missing account; one whose
+ * body does not arrive within the deadline still fails as the timeout of post().
+ * @returns {Promise<string>} one of the ERR_* constants
+ */
+async function mintFailureKind(response) {
+    let kind = MINT_STATUS_KINDS[response.status] || ERR_FAILED;
+    if (response.status !== 400) {
+        return kind;
+    }
+    let body = null;
+    try {
+        body = await response.json();
+    } catch (err) {
+        return kind;
+    }
+    let errors = body && Array.isArray(body.errors) ? body.errors : [];
+    let source = errors[0] && errors[0].source;
+    return source && source.pointer === UNVERIFIED_EMAIL_POINTER ? ERR_UNVERIFIED : kind;
+}
+
+/**
  * Exchange an authorization code for an API bearer.
  * @param {object} opts { apiUrl, clientId, redirectUri, code, verifier, fetchFn }
  * @returns {Promise<string>} the access token
@@ -116,7 +145,7 @@ export async function mintSaslToken(opts) {
     let url = endpoint(opts.apiUrl, '/irc/sasl-token');
     return post(opts.fetchFn, url, headers, '{}', async(response) => {
         if (!response.ok) {
-            let kind = MINT_STATUS_KINDS[response.status] || ERR_FAILED;
+            let kind = await mintFailureKind(response);
             throw new LoginError(kind, 'sasl-token answered HTTP ' + response.status);
         }
         let token = await readJson(response, 'sasl-token');

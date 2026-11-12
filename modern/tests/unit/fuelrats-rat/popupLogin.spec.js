@@ -1,4 +1,4 @@
-import { ERR_DENIED, ERR_POPUP_BLOCKED, ERR_POPUP_CLOSED, ERR_TIMEOUT } from '@/plugins/fuelrats-rat/lib/errors';
+import { ERR_DENIED, ERR_FAILED, ERR_POPUP_BLOCKED, ERR_POPUP_CLOSED, ERR_TIMEOUT } from '@/plugins/fuelrats-rat/lib/errors';
 import {
     authorizeUrl, CALLBACK_MESSAGE_TYPE, CLOSED_POLL_MS, LOGIN_TIMEOUT_MS, POPUP_NAME,
     readCallbackMessage, runLoginPopup
@@ -159,6 +159,20 @@ describe('runLoginPopup', () => {
         let pending = runLoginPopup(win, Promise.resolve('https://fuelrats.com/authorize'), STATE);
         win.dispatch(answer(popup, { error: 'access_denied' }));
         await expect(pending).rejects.toMatchObject({ kind: ERR_DENIED });
+    });
+
+    it.each([
+        'invalid_request', 'invalid_scope', 'unauthorised_client', 'unsupported_response_type',
+        'server_error',
+    ])('fails rather than cancels on any other error the website sent back (%s)', async(code) => {
+        let popup = fakePopup();
+        let win = fakeWindow(popup);
+        let pending = runLoginPopup(win, Promise.resolve('https://fuelrats.com/authorize'), STATE);
+        win.dispatch(answer(popup, { error: code }));
+        await expect(pending).rejects.toMatchObject({ kind: ERR_FAILED, message: 'failed: ' + code });
+        expect(popup.close).toHaveBeenCalled();
+        expect(win.listenerCount()).toBe(0);
+        expect(jest.getTimerCount()).toBe(0);
     });
 
     it('resets when the user closes the popup', async() => {

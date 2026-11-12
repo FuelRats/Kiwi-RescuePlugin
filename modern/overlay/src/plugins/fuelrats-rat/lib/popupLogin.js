@@ -2,7 +2,7 @@
 // page, which redirects it to static/fuelrats-rat/callback.html; that page posts
 // { type, code, state } (or { type, error, state }) back to this window and closes.
 import {
-    ERR_DENIED, ERR_POPUP_BLOCKED, ERR_POPUP_CLOSED, ERR_TIMEOUT, LoginError
+    ERR_DENIED, ERR_FAILED, ERR_POPUP_BLOCKED, ERR_POPUP_CLOSED, ERR_TIMEOUT, LoginError
 } from './errors';
 
 export const CALLBACK_MESSAGE_TYPE = 'fuelrats-rat-login';
@@ -11,6 +11,10 @@ export const POPUP_NAME = 'fuelrats-rat-login';
 export const POPUP_FEATURES = 'width=520,height=720';
 export const CLOSED_POLL_MS = 500;
 export const LOGIN_TIMEOUT_MS = 5 * 60 * 1000;
+
+// The authorize error of a user who chose Deny (RFC 6749 4.1.2.1). Any other error code means the
+// request or the website is misconfigured, so the login failed rather than being cancelled.
+export const ERROR_ACCESS_DENIED = 'access_denied';
 
 /**
  * The website's authorize URL for one login attempt.
@@ -109,7 +113,8 @@ export function runLoginPopup(win, urlPromise, state) {
             }
             popup.close();
             if (answer.error) {
-                finish(reject, new LoginError(ERR_DENIED, answer.error));
+                let kind = answer.error === ERROR_ACCESS_DENIED ? ERR_DENIED : ERR_FAILED;
+                finish(reject, new LoginError(kind, answer.error));
             } else {
                 finish(resolve, answer.code);
             }

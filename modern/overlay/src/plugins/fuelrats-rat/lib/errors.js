@@ -5,6 +5,7 @@ export const ERR_POPUP_CLOSED = 'popup-closed';
 export const ERR_TIMEOUT = 'timeout';
 export const ERR_DENIED = 'denied';
 export const ERR_NO_ACCOUNT = 'no-account';
+export const ERR_UNVERIFIED = 'unverified';
 export const ERR_UNAUTHORIZED = 'unauthorized';
 export const ERR_UNAVAILABLE = 'unavailable';
 export const ERR_LOGGED_OUT = 'logged-out';

@@ -1,9 +1,29 @@
-import { ERR_FAILED, ERR_NETWORK } from '@/plugins/fuelrats-rat/lib/errors';
+import { ERR_FAILED, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_UNVERIFIED } from '@/plugins/fuelrats-rat/lib/errors';
 import { exchangeCode, mintSaslToken, REQUEST_TIMEOUT_MS } from '@/plugins/fuelrats-rat/lib/ratApi';
 
 const API_URL = 'https://api.fuelrats.com';
 const BEARER = 'Xq7Lm2Rt9Vb4Nc8Kp3Wd6Hf1Js5Gz0Ay';
 const IRC_TOKEN = 'frk1:1782893400:' + '3f'.repeat(32);
+
+// A 400 of POST /irc/sasl-token as the API sends it (JSON:API error document).
+function refusal(source, detail) {
+    return {
+        errors: [{
+            id: '7d4c2a91-5e3b-4f60-8a1d-2c9e6b0f4a37',
+            links: { about: 'https://fuelrats.com/profile/overview' },
+            status: 'bad_request',
+            code: 400,
+            title: 'Bad Request',
+            detail,
+            source,
+        }],
+    };
+}
+
+const UNVERIFIED_BODY = refusal(
+    { pointer: '/email' },
+    'Verify the email address of your Fuel Rats account before logging in to IRC with it'
+);
 
 function response(status, body) {
     return {
@@ -117,6 +137,30 @@ describe('IRC token mint', () => {
             message: 'failed: sasl-token answered with invalid JSON',
         });
     });
+
+    it('tells an unverified website email by the /email pointer of its 400', async() => {
+        await expect(mint(answering(response(400, UNVERIFIED_BODY)))).rejects.toMatchObject({
+            kind: ERR_UNVERIFIED,
+            message: 'unverified: sasl-token answered HTTP 400',
+        });
+    });
+
+    it.each([
+        ['an empty source', response(400, refusal({}, 'Bad Request'))],
+        ['another pointer', response(400, refusal({ pointer: '/nick' }, 'Bad Request'))],
+        ['a parameter source', response(400, refusal({ parameter: 'email' }, 'Bad Request'))],
+        ['no errors', response(400, { errors: [] })],
+        ['errors that are not a list', response(400, { errors: { source: { pointer: '/email' } } })],
+        ['an error without a source', response(400, { errors: [{ status: 'bad_request' }] })],
+        ['a null error', response(400, { errors: [null] })],
+        ['a null body', response(400, null)],
+        ['a body that is not JSON', htmlResponse(400)],
+    ])('takes any other 400 for a missing Anope account: %s', async(what, res) => {
+        await expect(mint(answering(res))).rejects.toMatchObject({
+            kind: ERR_NO_ACCOUNT,
+            message: 'no-account: sasl-token answered HTTP 400',
+        });
+    });
 });
 
 describe('request timeout', () => {
@@ -162,6 +206,27 @@ describe('request timeout', () => {
             kind: ERR_NETWORK,
             message: 'network: POST https://api.fuelrats.com/oauth2/token timed out after 15 s',
         });
+    });
+
+    it('also gives up on a mint 400 whose error body never arrives', async() => {
+        let json = jest.fn();
+        let fetchFn = jest.fn((url, init) => {
+            json.mockImplementation(() => untilAborted(init.signal));
+            return Promise.resolve({ ok: false, status: 400, json });
+        });
+        let pending = mint(fetchFn);
+        let settled = jest.fn();
+        pending.then(settled, settled);
+        await calledSoon(json);
+        expect(json).toHaveBeenCalled();
+        expect(settled).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(REQUEST_TIMEOUT_MS);
+        await expect(pending).rejects.toMatchObject({
+            kind: ERR_NETWORK,
+            message: 'network: POST https://api.fuelrats.com/irc/sasl-token timed out after 15 s',
+        });
+        expect(jest.getTimerCount()).toBe(0);
     });
 
     it('clears its deadline once the request is answered', async() => {

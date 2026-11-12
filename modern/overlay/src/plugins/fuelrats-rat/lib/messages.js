@@ -2,7 +2,7 @@
 // means the screen just returns to the login button (the user closed the popup).
 import {
     ERR_DENIED, ERR_FAILED, ERR_LOGGED_OUT, ERR_NETWORK, ERR_NO_ACCOUNT, ERR_POPUP_CLOSED,
-    ERR_TIMEOUT, ERR_UNAUTHORIZED, ERR_UNAVAILABLE
+    ERR_TIMEOUT, ERR_UNAUTHORIZED, ERR_UNAVAILABLE, ERR_UNVERIFIED
 } from './errors';
 
 export const MESSAGES = {
@@ -11,6 +11,7 @@ export const MESSAGES = {
     [ERR_DENIED]: 'The Fuel Rats login was cancelled.',
     [ERR_NO_ACCOUNT]: 'Your Fuel Rats account has no IRC nickname yet. Register one on your ' +
         'profile, then try again.',
+    [ERR_UNVERIFIED]: 'Verify the email address of your Fuel Rats account, then try again.',
     [ERR_UNAUTHORIZED]: 'Your Fuel Rats login has expired. Please log in again.',
     [ERR_UNAVAILABLE]: 'Logging in with Fuel Rats is unavailable right now. Please use your ' +
         'nick and password instead.',
