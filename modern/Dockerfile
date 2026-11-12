@@ -6,12 +6,20 @@
 # engines at 22); the runtime image is nginx + static files. The test stage (eslint, stylelint,
 # jest) gates the build stage.
 #
+# KIWI_VARIANT picks what is compiled in and baked as static/config.json:
+#   rescue (default)  clients.fuelrats.com: patches-web/rescue/ bundles the rescue module;
+#                     config/config.json.
+#   rat               kiwi.fuelrats.com: patches-web/rat/ bundles the rat module
+#                     (overlay/src/plugins/fuelrats-rat) instead; config/config.rat.json.
+# patches-web/common/ applies to both. Lint and unit tests cover the overlay of both variants.
+#
 # overlay/package.json + overlay/yarn.lock replace upstream's: upstream's package.json plus yarn
 # "resolutions" that lift vulnerable transitive deps (lodash, ip-address, postcss, nanoid, ...)
 # and i18next-http-backend 4.x. When KIWIIRC_COMMIT moves, re-apply those edits to the new
 # upstream package.json and regenerate yarn.lock (yarn install in node:22-alpine).
 #
 #   docker build -f modern/Dockerfile -t fr-kiwi-web modern/
+#   docker build -f modern/Dockerfile --build-arg KIWI_VARIANT=rat -t fr-kiwi-web-rat modern/
 #   docker build -f modern/Dockerfile --target test modern/     # lint + unit tests only
 
 ARG NODE_IMAGE=node:22-alpine
@@ -30,13 +38,20 @@ RUN corepack enable && yarn install --frozen-lockfile --non-interactive --networ
 
 FROM deps AS overlay
 ARG KIWIIRC_COMMIT=7345960f0da2dc014d464aa0e2c41fe6390314b6
+ARG KIWI_VARIANT=rescue
+RUN case "$KIWI_VARIANT" in rescue|rat) ;; *) echo "bad KIWI_VARIANT" >&2; exit 1;; esac
 RUN apk add --no-cache git
 COPY --from=source /src/ ./
 COPY patches-web/ /tmp/patches/
-RUN git apply -p1 /tmp/patches/*.patch
+RUN set -e; for p in /tmp/patches/common/*.patch "/tmp/patches/${KIWI_VARIANT}"/*.patch; do \
+        [ -e "$p" ] || continue; \
+        git apply -p1 "$p"; \
+    done
 COPY overlay/ ./
 COPY tests/unit/ ./tests/unit/
-COPY config/config.json ./static/config.json
+COPY config/ /tmp/config/
+RUN if [ "$KIWI_VARIANT" = rat ]; then cfg=config.rat.json; else cfg=config.json; fi && \
+    cp "/tmp/config/$cfg" ./static/config.json
 # vue.config.js reads the commit via git; the tarball has no .git, so give it one to report.
 RUN git init -q && git -c user.name=build -c user.email=build@localhost commit -q --allow-empty \
         -m "kiwiirc ${KIWIIRC_COMMIT} + fuelrats overlay"
@@ -49,8 +64,12 @@ COPY --from=test /tmp/tests-passed /tmp/tests-passed
 RUN yarn build --nomap
 
 FROM ${NGINX_IMAGE} AS web
-LABEL org.opencontainers.image.title="fr-kiwi-web" \
-      org.opencontainers.image.description="FuelRats rescue-client Kiwi IRC (static SPA + nginx)" \
+ARG KIWI_VARIANT=rescue
+# Label text per variant: KIWI_IS_RAT is "rat" only for rat, KIWI_IS_RESCUE "rescue" only for rescue.
+ARG KIWI_IS_RAT=${KIWI_VARIANT#rescue}
+ARG KIWI_IS_RESCUE=${KIWI_VARIANT#rat}
+LABEL org.opencontainers.image.title="fr-kiwi-web${KIWI_IS_RAT:+-rat}" \
+      org.opencontainers.image.description="${KIWI_IS_RESCUE:+FuelRats rescue-client Kiwi IRC (static SPA + nginx)}${KIWI_IS_RAT:+FuelRats rat Kiwi IRC (static SPA + nginx)}" \
       org.opencontainers.image.source="https://github.com/FuelRats/Kiwi-RescuePlugin"
 USER root
 RUN apk upgrade --no-cache

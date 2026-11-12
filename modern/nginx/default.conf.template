@@ -68,6 +68,13 @@ server {
         proxy_send_timeout 1d;
     }
 
+    # The SPA shell names the hashed bundles, so browsers revalidate it on every load and pick up a
+    # new build without a hard reload. `/` and SPA routes reach it through internal redirects
+    # (index, try_files), so they get the same header.
+    location = /index.html {
+        add_header Cache-Control "no-cache" always;
+    }
+
     location / {
         try_files $uri $uri/ /index.html;
     }

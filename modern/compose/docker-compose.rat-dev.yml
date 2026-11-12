@@ -1,0 +1,30 @@
+# Local test stack for the rat client: kiwi-rat-web + kiwi-rat-gateway against the DEV IRC
+# network. Everything binds to 127.0.0.1 only. Unlike prod (mozzarella-rat.yml), the browser
+# reaches the gateway through the web container's /webirc/ proxy.
+# Conflicts with docker-compose.dev.yml, whose mock announcer also publishes 127.0.0.1:8099, so
+# don't run both stacks at once.
+#   docker build -f modern/Dockerfile --build-arg KIWI_VARIANT=rat -t fr-kiwi-web-rat:local modern/
+#   KIWI_GATEWAY_SECRET=$(openssl rand -hex 32) docker compose -f modern/compose/docker-compose.rat-dev.yml up -d
+#   open http://localhost:8099/
+name: kiwi-rat-dev
+
+services:
+  kiwi-rat-web:
+    image: ${KIWI_WEB_IMAGE:-fr-kiwi-web-rat:local}
+    environment:
+      KIWI_GATEWAY: kiwi-rat-gateway:7001
+    volumes:
+      - ../config/config.rat.json:/usr/share/nginx/html/static/config.json:ro
+    ports:
+      - "127.0.0.1:8099:8080"
+    depends_on:
+      - kiwi-rat-gateway
+    restart: unless-stopped
+
+  kiwi-rat-gateway:
+    image: ${KIWI_GATEWAY_IMAGE:-fr-kiwi-gateway:local}
+    environment:
+      KIWI_GATEWAY_SECRET: ${KIWI_GATEWAY_SECRET:?set KIWI_GATEWAY_SECRET}
+    volumes:
+      - ../gateway/config.rat-dev.conf:/etc/webircgateway/config.conf:ro
+    restart: unless-stopped

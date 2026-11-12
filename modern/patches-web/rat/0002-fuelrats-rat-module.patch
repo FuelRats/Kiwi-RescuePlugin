@@ -1,0 +1,14 @@
+diff --git i/src/main.js w/src/main.js
+index 892dedbf..ae201a74 100644
+--- i/src/main.js
++++ w/src/main.js
+@@ -62,6 +62,9 @@ let api = window.kiwi = GlobalApi.singleton();
+ /* eslint-disable import/first */
+ import '@/thirdparty/';
+ 
++// FuelRats rat-client module (clears the legacy Kiwi 1.5.1 browser state via the plugin API)
++import '@/plugins/fuelrats-rat/';
++
+ function getQueryVariable(variable) {
+     let query = window.location.search.substring(1);
+     let vars = query.split('&');
