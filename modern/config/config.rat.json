@@ -57,7 +57,7 @@
     "fuelratsRat": {
         "websiteUrl": "https://fuelrats.com",
         "apiUrl": "https://api.fuelrats.com",
-        "clientId": "",
+        "clientId": "fc7cc858-5b41-483c-874b-ac1f23431747",
         "redirectUri": "https://kiwi.fuelrats.com/static/fuelrats-rat/callback.html"
     }
 }
