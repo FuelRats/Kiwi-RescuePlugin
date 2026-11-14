@@ -1,6 +1,6 @@
 // Kiwi 1.5.1 on kiwi.fuelrats.com saved its state under this localStorage key (its default
-// startupOptions.state_key), and that state can hold the NickServ password. The rat config sets
-// state_key to "", so Kiwi saves nothing; this removes what earlier visits left behind.
+// startupOptions.state_key). The rat config saves under its own key (lib/savedSession.js), and
+// never reads this one; this removes what earlier visits left behind.
 export const LEGACY_STATE_KEY = 'kiwi-state';
 
 /**

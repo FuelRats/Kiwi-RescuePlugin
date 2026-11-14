@@ -1,5 +1,5 @@
 import { ERR_UNAUTHORIZED, LoginError } from '@/plugins/fuelrats-rat/lib/errors';
-import { wrapConnect } from '@/plugins/fuelrats-rat/lib/connectWrapper';
+import { wrapConnect, wrapNetworks } from '@/plugins/fuelrats-rat/lib/connectWrapper';
 
 // A NetworkState stand-in whose ircClient.connect plays Kiwi's overload: it records the nick and
 // password at call time, which is when Kiwi copies them into the SASL options.
@@ -135,5 +135,24 @@ describe('connect wrapper', () => {
         await network.ircClient.connect();
         expect(mint).toHaveBeenCalledTimes(1);
         expect(network.sent).toHaveLength(1);
+    });
+
+    it('wraps restored networks so their login connects mint a token too', async() => {
+        let restored = [fakeNetwork(), fakeNetwork()];
+        let mint = tokenMinter();
+        let hooks = { useLogin: () => true, mint, onMintError: jest.fn() };
+        wrapNetworks(restored, hooks);
+        // A later network.new for the same network does not wrap it twice.
+        wrapConnect(restored[0], hooks);
+
+        await restored[0].ircClient.connect();
+        await restored[1].ircClient.connect();
+
+        expect(mint).toHaveBeenCalledTimes(2);
+        expect(restored[0].sent).toHaveLength(1);
+        expect(restored[0].sent[0].password).toMatch(/^frk1:/);
+        expect(restored[1].sent[0].password).toMatch(/^frk1:/);
+        expect(restored[0].password).toBe('');
+        expect(restored[1].password).toBe('');
     });
 });

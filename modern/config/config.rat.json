@@ -3,11 +3,23 @@
     "startupScreen": "fuelratsRat",
     "kiwiServer": "/webirc/kiwiirc/",
     "restricted": true,
-    "theme": "Dark",
+    "theme": "Classic",
     "themes": [
+        {
+            "name": "Classic",
+            "url": "static/themes/classic"
+        },
         {
             "name": "FuelRats",
             "url": "static/themes/fuelrats"
+        },
+        {
+            "name": "Fuel Rats Light",
+            "url": "static/themes/fuelrats-light"
+        },
+        {
+            "name": "High Contrast",
+            "url": "static/themes/high-contrast"
         },
         {
             "name": "Default",
@@ -20,6 +32,10 @@
         {
             "name": "Coffee",
             "url": "static/themes/coffee"
+        },
+        {
+            "name": "Elite",
+            "url": "static/themes/elite"
         },
         {
             "name": "GrayFox",
@@ -42,6 +58,9 @@
             "url": "static/themes/sky"
         }
     ],
+    "buffers": {
+        "messageLayout": "compact"
+    },
     "disconnectOnSaslFail": true,
     "autoReconnect": false,
     "startupOptions": {
@@ -51,7 +70,8 @@
         "direct": false,
         "channel": "#ratchat",
         "nick": "",
-        "state_key": ""
+        "state_key": "fr-rat-state",
+        "remember_buffers": true
     },
     "plugins": [],
     "fuelratsRat": {

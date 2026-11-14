@@ -111,12 +111,14 @@
 // has a client id. Without one it is the plain nick and password form. The login path connects
 // through the connect wrapper (lib/connectWrapper.js), which replaces the nick and the password
 // with a freshly minted IRC login.
+// A saved session (lib/savedSession.js) fills in the nick and password and keeps its channels.
 
 import _ from 'lodash';
 import * as Misc from '@/helpers/Misc';
 import Logger from '@/libs/Logger';
 import StartupLayout from '@/components/startups/CommonLayout';
 import { PROFILE_LINK_TEXT } from '../lib/messages';
+import { savedSession } from '../lib/savedSession';
 import { STATUS_LOGGED_IN, STATUS_LOGGING_IN } from '../lib/ratLogin';
 import ratLogin from '../login';
 import store from '../store';
@@ -205,7 +207,18 @@ export default {
     },
     created() {
         let options = this.startupOptions;
-        this.nick = processNickRandomNumber(Misc.queryStringVal('nick') || options.nick || '');
+        let saved = savedSession(this.$state, this.connectOptions().hostname);
+        if (saved) {
+            this.network = saved.network;
+        }
+        let savedNick = saved ? saved.nick : '';
+        this.nick = processNickRandomNumber(
+            savedNick || Misc.queryStringVal('nick') || options.nick || ''
+        );
+        if (saved && saved.password) {
+            this.showPassword = true;
+            this.password = saved.password;
+        }
         this.channel = decodeURIComponent(window.location.hash) || options.channel || '';
     },
     methods: {

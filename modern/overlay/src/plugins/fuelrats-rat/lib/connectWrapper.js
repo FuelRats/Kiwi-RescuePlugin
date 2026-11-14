@@ -65,3 +65,13 @@ export function wrapConnect(network, hooks) {
         return minting;
     };
 }
+
+/**
+ * Wrap networks that already exist. Kiwi restores a saved session (lib/savedSession.js) before
+ * plugins load and without a network.new event, so those networks are wrapped here.
+ * @param {object[]} networks Kiwi NetworkStates
+ * @param {object} hooks as for wrapConnect
+ */
+export function wrapNetworks(networks, hooks) {
+    networks.forEach((network) => wrapConnect(network, hooks));
+}

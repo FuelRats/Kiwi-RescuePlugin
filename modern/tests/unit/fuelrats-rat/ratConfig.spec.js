@@ -1,7 +1,8 @@
 // The rat configs, modern/config/config.rat.json and config.rat-dev.json. The Dockerfile's overlay
 // stage copies modern/config/ to /tmp/config/, outside the Kiwi tree these specs run in.
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import path from 'path';
+import { LEGACY_STATE_KEY } from '@/plugins/fuelrats-rat/lib/legacyState';
 
 const CONFIG_DIR = '/tmp/config';
 const RAT_CONFIGS = ['config.rat.json', 'config.rat-dev.json'];
@@ -20,8 +21,21 @@ describe('rat configs', () => {
         expect(config.disconnectOnSaslFail).toBe(true);
     });
 
-    // Kiwi saves no state in localStorage (lib/legacyState.js).
-    it.each(RAT_CONFIGS)('%s keeps no Kiwi state in the browser', (name) => {
-        expect(readConfig(name).startupOptions.state_key).toBe('');
+    // Kiwi saves the session and settings under its own key, never the Kiwi 1.5.1 one that
+    // lib/legacyState.js removes on every load (lib/savedSession.js).
+    it.each(RAT_CONFIGS)('%s saves the session under its own key', (name) => {
+        let options = readConfig(name).startupOptions;
+        expect(options.state_key).toBe('fr-rat-state');
+        expect(options.state_key).not.toBe(LEGACY_STATE_KEY);
+        expect(options.remember_buffers).toBe(true);
+    });
+
+    // Specs run from the Kiwi tree root, where upstream and overlay themes live side by side.
+    it.each(RAT_CONFIGS)('%s lists only themes that exist, the default among them', (name) => {
+        let config = readConfig(name);
+        config.themes.forEach((theme) => {
+            expect(existsSync(path.join(theme.url, 'theme.css'))).toBe(true);
+        });
+        expect(config.themes.map((theme) => theme.name)).toContain(config.theme);
     });
 });
