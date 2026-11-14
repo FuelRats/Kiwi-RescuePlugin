@@ -1,0 +1,37 @@
+/* High Contrast: white text on black, bright nick colours, /me actions, joins and parts, and
+   visible borders. */
+@import '../dark/theme.css';
+
+:root {
+    --brand-primary: #1f6feb;
+    --brand-primary-hover: #4a8ff0;
+    --brand-midtone: #1a1a1a;
+    --brand-darktone: #cfcfcf;
+    --brand-default-bg: #000;
+    --brand-default-fg: #fff;
+    --brand-action-fg: #7dff7d;
+    --brand-join-fg: #8fd18f;
+    --brand-part-fg: #ff8080;
+    --brand-input-border: #aaa;
+    --brand-input-fg: #fff;
+    --brand-input-bg: #000;
+    --brand-link-normal: #8cc4ff;
+    --brand-link--hover: #b8dcff;
+    --comp-header-name-fg: #fff;
+    --comp-statebrowser-fg: #fff;
+    --comp-statebrowser-bg: #000;
+    --comp-statebrowser-channel-active-fg: #fff;
+    --comp-statebrowser-channel-active-bg: #ffffff26;
+    --comp-sidebar-bg: #000;
+    --comp-sidebar-fg: #fff;
+    --comp-border: #888;
+}
+
+.kiwi-wrap {
+    --kiwi-nickcolour-saturation: 60;
+    --kiwi-nickcolour-lightness: 80;
+}
+
+.kiwi-messagelist-message--highlight {
+    background-color: #2a2a00;
+}

@@ -1,0 +1,263 @@
+diff --git i/static/themes/coffee/theme.css w/static/themes/coffee/theme.css
+index fe76180..d9529c9 100644
+--- i/static/themes/coffee/theme.css
++++ w/static/themes/coffee/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #2e7d32;
++    --brand-part-fg: #b03030;
++    --brand-action-fg: #1a6e1a;
+     /* Primary Variables */
+     --brand-primary: #8e715b;
+     --brand-primary-hover: #bea28c;
+@@ -49,6 +52,12 @@
+     --comp-border: #b2b2b2;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the light message background */
++.kiwi-wrap {
++    --kiwi-nickcolour-saturation: 70;
++    --kiwi-nickcolour-lightness: 28;
++}
++
+ .kiwi-appsettings-close,
+ .kiwi-appsettings-block h3,
+ .kiwi-networksettings .kiwi-title,
+diff --git i/static/themes/common/base.css w/static/themes/common/base.css
+index 9f3bd0a..8f301f4 100644
+--- i/static/themes/common/base.css
++++ w/static/themes/common/base.css
+@@ -831,8 +831,12 @@
+     background: var(--brand-midtone);
+ }
+ 
++/* /me actions: semi-bold italic in --brand-action-fg, so they stand apart from messages and
++   from the regular-weight italic join, part and quit lines */
+ .kiwi-messagelist-message-action .kiwi-messagelist-body {
+-    color: var(--brand-primary);
++    color: var(--brand-action-fg, var(--brand-primary));
++    font-style: italic;
++    font-weight: 600;
+ }
+ 
+ .kiwi-messagelist-message--highlight {
+@@ -878,9 +882,11 @@
+ }
+ 
+ /* ---- Traffic Messages ---- */
++/* --brand-join-fg and --brand-part-fg let a theme keep these lines readable on its message
++   background without changing the brand and error colours used for buttons and banners */
+ .kiwi-messagelist-message-traffic-join,
+ .kiwi-messagelist-message-traffic-join_self {
+-    color: var(--brand-primary);
++    color: var(--brand-join-fg, var(--brand-primary));
+ }
+ 
+ .kiwi-messagelist-message-traffic-quit,
+@@ -889,14 +895,14 @@
+ .kiwi-messagelist-message-traffic-part_self,
+ .kiwi-messagelist-message-traffic-kick,
+ .kiwi-messagelist-message-traffic-kick_self {
+-    color: var(--brand-error);
++    color: var(--brand-part-fg, var(--brand-error));
+ }
+ 
+ .kiwi-messagelist-message-traffic-quit .kiwi-nick::before,
+ .kiwi-messagelist-message-traffic-quit_self .kiwi-nick::before,
+ .kiwi-messagelist-message-traffic-part .kiwi-nick::before,
+ .kiwi-messagelist-message-traffic-part_self .kiwi-nick::before {
+-    color: var(--brand-error);
++    color: var(--brand-part-fg, var(--brand-error));
+ }
+ 
+ /* ---- Modern Layout Styling ---- */
+diff --git i/static/themes/dark/theme.css w/static/themes/dark/theme.css
+index 52927ea..18a50a4 100644
+--- i/static/themes/dark/theme.css
++++ w/static/themes/dark/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root{
++    --brand-join-fg: #6fa86f;
++    --brand-part-fg: #e07a7a;
++    --brand-action-fg: #6ee26e;
+     --brand-primary: #2f896b;
+     --brand-primary-hover: #5ec9a6;
+     --brand-midtone: #2b2b2b;
+@@ -41,9 +44,10 @@
+     --comp-border: #484848;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the dark message background */
+ .kiwi-wrap {
+-    --kiwi-nickcolour-saturation: 40;
+-    --kiwi-nickcolour-lightness: 40;
++    --kiwi-nickcolour-saturation: 55;
++    --kiwi-nickcolour-lightness: 75;
+ }
+ 
+ .kiwi-wrap select option {
+diff --git i/static/themes/default/theme.css w/static/themes/default/theme.css
+index 327ee08..f700fc2 100644
+--- i/static/themes/default/theme.css
++++ w/static/themes/default/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #2e7d32;
++    --brand-part-fg: #b03030;
++    --brand-action-fg: #1a6e1a;
+     /* Primary Variables */
+     --brand-primary: #42b992;
+     --brand-primary-hover: #5ec9a6;
+@@ -53,6 +56,12 @@
+     --comp-border: #b2b2b2;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the light message background */
++.kiwi-wrap {
++    --kiwi-nickcolour-saturation: 70;
++    --kiwi-nickcolour-lightness: 28;
++}
++
+ /* IRC Text Colours */
+ .irc-fg-colour-white { color: #fff; }
+ .irc-fg-colour-black { color: #000; }
+diff --git i/static/themes/elite/theme.css w/static/themes/elite/theme.css
+index 13ff834..c64b6bf 100644
+--- i/static/themes/elite/theme.css
++++ w/static/themes/elite/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #6fa86f;
++    --brand-part-fg: #e07a7a;
++    --brand-action-fg: #6ee26e;
+     /* Primary Variables */
+     --brand-primary: #ff9600;
+     --brand-primary-hover: #ffbf00;
+@@ -54,6 +57,12 @@
+     --comp-border: #b2b2b2;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the dark message background */
++.kiwi-wrap {
++    --kiwi-nickcolour-saturation: 55;
++    --kiwi-nickcolour-lightness: 75;
++}
++
+ .kiwi-startup-common-section-info {
+     border-left-color: var(--brand-primary);
+ }
+diff --git i/static/themes/grayfox/theme.css w/static/themes/grayfox/theme.css
+index 2304a87..441e389 100644
+--- i/static/themes/grayfox/theme.css
++++ w/static/themes/grayfox/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #2e7d32;
++    --brand-part-fg: #b03030;
++    --brand-action-fg: #1a6e1a;
+     /* Primary Variables */
+     --brand-primary: #747c88;
+     --brand-primary-hover: #9098a2;
+@@ -49,6 +52,12 @@
+     --comp-border: #b2b2b2;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the light message background */
++.kiwi-wrap {
++    --kiwi-nickcolour-saturation: 70;
++    --kiwi-nickcolour-lightness: 28;
++}
++
+ .kiwi-appsettings-close,
+ .kiwi-appsettings-block h3,
+ .kiwi-networksettings .kiwi-title,
+diff --git i/static/themes/nightswatch/theme.css w/static/themes/nightswatch/theme.css
+index c39a8d4..c694ab0 100644
+--- i/static/themes/nightswatch/theme.css
++++ w/static/themes/nightswatch/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #6fa86f;
++    --brand-part-fg: #e07a7a;
++    --brand-action-fg: #6ee26e;
+     /* Primary Variables */
+     --brand-primary: #000;
+     --brand-primary-hover: #2d2d2d;
+@@ -54,8 +57,10 @@
+     --comp-border: #444;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the dark message background */
+ .kiwi-wrap {
+-    --kiwi-nickcolour-lightness: 50;
++    --kiwi-nickcolour-saturation: 55;
++    --kiwi-nickcolour-lightness: 75;
+ }
+ 
+ /* Welcome */
+diff --git i/static/themes/osprey/theme.css w/static/themes/osprey/theme.css
+index 4192a6d..a8f7402 100644
+--- i/static/themes/osprey/theme.css
++++ w/static/themes/osprey/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #2e7d32;
++    --brand-part-fg: #b03030;
++    --brand-action-fg: #1a6e1a;
+     /* Primary Variables */
+     --brand-primary: #4d6075;
+     --brand-primary-hover: #73879c;
+@@ -49,6 +52,12 @@
+     --comp-border: #b2b2b2;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the light message background */
++.kiwi-wrap {
++    --kiwi-nickcolour-saturation: 70;
++    --kiwi-nickcolour-lightness: 28;
++}
++
+ /* Welcome Screens */
+ .kiwi-startup-common-section-info {
+     border-left-color: var(--brand-primary);
+diff --git i/static/themes/sky/theme.css w/static/themes/sky/theme.css
+index 49871be..6c33cd1 100644
+--- i/static/themes/sky/theme.css
++++ w/static/themes/sky/theme.css
+@@ -1,6 +1,9 @@
+ @import '../common/base.css';
+ 
+ :root {
++    --brand-join-fg: #2e7d32;
++    --brand-part-fg: #b03030;
++    --brand-action-fg: #1a6e1a;
+     /* Primary Variables */
+     --brand-primary: #78c9dc;
+     --brand-primary-hover: #8fd9ea;
+@@ -49,6 +52,12 @@
+     --comp-border: #b2b2b2;
+ }
+ 
++/* Nick colours stay at or above 4.5:1 contrast on the light message background */
++.kiwi-wrap {
++    --kiwi-nickcolour-saturation: 70;
++    --kiwi-nickcolour-lightness: 28;
++}
++
+ /* Welcome */
+ .kiwi-startup-common-section-info {
+     border-left-color: var(--brand-primary);

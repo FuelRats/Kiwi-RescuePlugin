@@ -1,0 +1,22 @@
+/* Fuel Rats Light: the Default (light) theme with the fuelrats.com brand red, darkened to keep
+   4.5:1 contrast for links and white button text. */
+@import '../default/theme.css';
+
+:root {
+    --brand-primary: #b03030;
+    --brand-primary-hover: #c94848;
+    --brand-link-normal: #a82e2e;
+    --brand-link--hover: #c94848;
+    --comp-workspace-before-bg: var(--brand-primary);
+    --comp-header-option-active-bg: var(--brand-primary);
+    --comp-aboutbuffer-header-bg: var(--brand-primary);
+}
+
+.u-button-primary {
+    background-color: var(--brand-primary);
+    color: #fff;
+}
+
+.u-button-primary:hover {
+    background-color: var(--brand-primary-hover);
+}

@@ -1,0 +1,28 @@
+/* Classic: modelled on the Kiwi 1.5.1 Dark theme of the old kiwi.fuelrats.com:
+   brighter text, bright green /me actions, muted green joins and muted red parts. */
+@import '../dark/theme.css';
+
+:root {
+    --brand-primary: #42b992;
+    --brand-primary-hover: #62d0ac;
+    --brand-default-fg: #dedede;
+    --brand-input-fg: #dedede;
+    --brand-action-fg: #44f944;
+    --brand-join-fg: #6fa86f;
+    --brand-part-fg: #e07a7a;
+    --brand-link-normal: #4aa3e8;
+    --brand-link--hover: #7dbdf0;
+    --comp-statebrowser-fg: #dedede;
+    --comp-statebrowser-channel-active-fg: #fff;
+    --comp-sidebar-fg: #dedede;
+    --comp-header-name-fg: #fff;
+}
+
+.kiwi-wrap {
+    background: #201f1f;
+    color: #dedede;
+}
+
+.kiwi-messagelist-message--highlight {
+    background-color: #333;
+}

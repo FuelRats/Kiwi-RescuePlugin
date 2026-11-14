@@ -7,7 +7,7 @@ import GlobalApi from '@/libs/GlobalApi';
 import RatLoginPanel from './components/RatLoginPanel';
 import RatStartup from './components/RatStartup';
 import { CONFIG_DEFAULTS } from './config';
-import { wrapConnect } from './lib/connectWrapper';
+import { wrapConnect, wrapNetworks } from './lib/connectWrapper';
 import { clearLegacyState, LEGACY_STATE_KEY } from './lib/legacyState';
 import ratLogin from './login';
 import store from './store';
@@ -38,13 +38,15 @@ GlobalApi.singleton().plugin('fuelrats-rat', (kiwi, log) => {
         kiwi.addUi('browser', RatLoginPanel);
     }
 
-    // addNetwork emits network.new before it returns the network, so every network is wrapped
-    // before its first connect.
+    // Every network is wrapped before its first connect: the ones restored from a saved session
+    // exist already, and addNetwork emits network.new before it returns a new one.
+    let hooks = {
+        useLogin: () => store.useLogin,
+        mint: () => ratLogin.mint(),
+        onMintError: (network) => reportMintError(kiwi.state, network),
+    };
+    wrapNetworks(kiwi.state.networks, hooks);
     kiwi.on('network.new', (event) => {
-        wrapConnect(event.network, {
-            useLogin: () => store.useLogin,
-            mint: () => ratLogin.mint(),
-            onMintError: (network) => reportMintError(kiwi.state, network),
-        });
+        wrapConnect(event.network, hooks);
     });
 });
