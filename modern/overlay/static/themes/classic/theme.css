@@ -18,9 +18,12 @@
     --comp-header-name-fg: #fff;
 }
 
+/* The old Dark theme's nick lightness: with the rat client's 1.5.1 nick colours this shows every
+   nick in exactly its old colour, all at 4.9:1 contrast or better on this background. */
 .kiwi-wrap {
     background: #201f1f;
     color: #dedede;
+    --kiwi-nickcolour-lightness: 70;
 }
 
 .kiwi-messagelist-message--highlight {

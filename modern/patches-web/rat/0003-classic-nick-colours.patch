@@ -1,0 +1,47 @@
+diff --git i/src/helpers/TextFormatting.js w/src/helpers/TextFormatting.js
+index 1796986..44cfc44 100644
+--- i/src/helpers/TextFormatting.js
++++ w/src/helpers/TextFormatting.js
+@@ -4,10 +4,10 @@
+ import _ from 'lodash';
+ import ipRegex from 'ip-regex';
+ import i18next from 'i18next';
+-import * as murmurhash3 from 'murmurhash3js';
+ 
+ import getState from '@/libs/state';
+ import ThemeManager from '@/libs/ThemeManager';
++import { classicNickColour } from '@/plugins/fuelrats-rat/lib/classicNickColour';
+ 
+ export const urlRegex = new RegExp(
+     // Detect either a protocol or 'www.' to start a URL
+@@ -51,26 +51,14 @@ export function linkifyChannels(word) {
+ }
+ 
+ /**
+- * Convert a nickname string to a colour code
+- * Uses these properties from the CSS theme file:
+- * --kiwi-nickcolour-count: 200;  - number of available nick colours
+- * --kiwi-nickcolour-hueoffset: 0;  - moves the hue value by hueoffset amounts
+- * --kiwi-nickcolour-saturation: 70;  - the nick saturation in HSL value
++ * Convert a nickname string to a colour code.
++ * The rat client keeps the Kiwi 1.5.1 nick colours (plugins/fuelrats-rat/lib/classicNickColour.js);
++ * the theme sets their lightness:
+  * --kiwi-nickcolour-lightness: 40;  - the nick lightness in HSL value
+  */
+ export function createNickColour(nick) {
+     let themeMngr = ThemeManager.instance();
+-    let nickLower = (nick || '').toLowerCase();
+-    let nickNum = murmurhash3.x86.hash32(nickLower);
+-
+-    let bucketSize = toInt(themeMngr.themeVar('nickcolour-count')) || 200;
+-    let hueOffset = toInt(themeMngr.themeVar('nickcolour-hueoffset'));
+-    let hsl = {
+-        h: mapRange(Math.abs(nickNum) % bucketSize, 0, bucketSize, 0, 360) + hueOffset,
+-        s: toInt(themeMngr.themeVar('nickcolour-saturation')) || 70,
+-        l: toInt(themeMngr.themeVar('nickcolour-lightness')) || 40,
+-    };
+-    return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
++    return classicNickColour(nick, themeMngr.themeVar('nickcolour-lightness'));
+ }
+ 
+ /**
