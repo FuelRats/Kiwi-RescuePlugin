@@ -1,6 +1,8 @@
 /* Fuel Rats Light: the Default (light) theme with the fuelrats.com brand red, darkened to keep
    4.5:1 contrast for links and white button text. */
-@import '../default/theme.css';
+/* ?v=2 keeps browsers off the theme file the old kiwi.fuelrats.com served at the same path,
+   which they may still hold in cache (see ratConfig.spec.js). */
+@import '../default/theme.css?v=2';
 
 :root {
     --brand-primary: #b03030;

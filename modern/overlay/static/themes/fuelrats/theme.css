@@ -1,5 +1,7 @@
 /* Fuel Rats: the Dark theme with the fuelrats.com brand red (#d65050). */
-@import '../dark/theme.css';
+/* ?v=2 keeps browsers off the theme file the old kiwi.fuelrats.com served at the same path,
+   which they may still hold in cache (see ratConfig.spec.js). */
+@import '../dark/theme.css?v=2';
 
 :root {
     --brand-primary: #d65050;
