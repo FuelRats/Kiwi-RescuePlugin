@@ -7,15 +7,31 @@
     "themes": [
         {
             "name": "FuelRats",
-            "url": "static/themes/fuelrats"
+            "url": "static/themes/fuelrats?v=2"
+        },
+        {
+            "name": "Classic",
+            "url": "static/themes/classic?v=2"
+        },
+        {
+            "name": "Fuel Rats Light",
+            "url": "static/themes/fuelrats-light?v=2"
+        },
+        {
+            "name": "High Contrast",
+            "url": "static/themes/high-contrast?v=2"
         },
         {
             "name": "Dark",
-            "url": "static/themes/dark"
+            "url": "static/themes/dark?v=2"
         },
         {
             "name": "Default",
-            "url": "static/themes/default"
+            "url": "static/themes/default?v=2"
+        },
+        {
+            "name": "Elite",
+            "url": "static/themes/elite?v=2"
         }
     ],
     "warnOnExit": true,
