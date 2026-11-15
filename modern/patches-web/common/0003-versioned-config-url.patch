@@ -1,14 +1,15 @@
 diff --git i/index.html w/index.html
-index 8c5e97b..addfe20 100644
+index 8c5e97b..4791527 100644
 --- i/index.html
 +++ w/index.html
-@@ -5,6 +5,10 @@
+@@ -5,6 +5,11 @@
      <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content">
      <link rel="icon" type="image/png" href="static/favicon.png">
      <title>Fuel Rats: Kiwi IRC</title>
-+    <!-- The old kiwi.fuelrats.com served static/config.json without Cache-Control, so browsers
-+         may still hold its config; a url it never used loads the current one (main.js reads
-+         this meta). Theme urls in the config carry the same ?v=2. -->
++    <!-- Kiwi 1.5.1, on kiwi.fuelrats.com and on clients.fuelrats.com during failovers, served
++         static/config.json without Cache-Control, so browsers may still hold its config; a url
++         it never used loads the current one (main.js reads this meta). Theme urls in the
++         config carry the same ?v=2. -->
 +    <meta name="kiwiconfig" content="static/config.json?v=2">
      <style>
      /* target specific styles */
