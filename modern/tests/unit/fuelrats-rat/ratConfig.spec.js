@@ -6,9 +6,16 @@ import { LEGACY_STATE_KEY } from '@/plugins/fuelrats-rat/lib/legacyState';
 
 const CONFIG_DIR = '/tmp/config';
 const RAT_CONFIGS = ['config.rat.json', 'config.rat-dev.json'];
+// Themes in modern/overlay/static/themes/, each built on an upstream theme by @import.
+const OVERLAY_THEMES = ['classic', 'fuelrats', 'fuelrats-light', 'high-contrast'];
+const THEME_VERSION_QUERY = /\?v=2'?$/;
 
 function readConfig(name) {
     return JSON.parse(readFileSync(path.join(CONFIG_DIR, name), 'utf8'));
+}
+
+function themeDir(url) {
+    return url.split('?')[0];
 }
 
 describe('rat configs', () => {
@@ -34,8 +41,29 @@ describe('rat configs', () => {
     it.each(RAT_CONFIGS)('%s lists only themes that exist, the default among them', (name) => {
         let config = readConfig(name);
         config.themes.forEach((theme) => {
-            expect(existsSync(path.join(theme.url, 'theme.css'))).toBe(true);
+            expect(existsSync(path.join(themeDir(theme.url), 'theme.css'))).toBe(true);
         });
         expect(config.themes.map((theme) => theme.name)).toContain(config.theme);
+    });
+
+    // The old kiwi.fuelrats.com served static/themes/<name>/theme.css without Cache-Control, so
+    // browsers may keep its files for months without asking again. Kiwi keeps a query string in a
+    // theme url (ThemeManager.themeUrl), and a url with one the old site never used is fetched
+    // fresh, after which the no-cache header from nginx/default.conf.template applies.
+    it.each(RAT_CONFIGS)('%s asks for every theme under a url the old client never served', (name) => {
+        readConfig(name).themes.forEach((theme) => {
+            expect(theme.url).toMatch(THEME_VERSION_QUERY);
+        });
+    });
+
+    it('imports between overlay themes carry the same query', () => {
+        let imports = OVERLAY_THEMES.flatMap((theme) => {
+            let css = readFileSync(path.join('static/themes', theme, 'theme.css'), 'utf8');
+            return css.match(/@import '\.\.\/[^']+'/g) || [];
+        });
+        expect(imports.length).toBe(OVERLAY_THEMES.length);
+        imports.forEach((line) => {
+            expect(line).toMatch(THEME_VERSION_QUERY);
+        });
     });
 });

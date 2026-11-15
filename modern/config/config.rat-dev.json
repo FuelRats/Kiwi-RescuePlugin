@@ -7,55 +7,55 @@
     "themes": [
         {
             "name": "Classic",
-            "url": "static/themes/classic"
+            "url": "static/themes/classic?v=2"
         },
         {
             "name": "FuelRats",
-            "url": "static/themes/fuelrats"
+            "url": "static/themes/fuelrats?v=2"
         },
         {
             "name": "Fuel Rats Light",
-            "url": "static/themes/fuelrats-light"
+            "url": "static/themes/fuelrats-light?v=2"
         },
         {
             "name": "High Contrast",
-            "url": "static/themes/high-contrast"
+            "url": "static/themes/high-contrast?v=2"
         },
         {
             "name": "Default",
-            "url": "static/themes/default"
+            "url": "static/themes/default?v=2"
         },
         {
             "name": "Dark",
-            "url": "static/themes/dark"
+            "url": "static/themes/dark?v=2"
         },
         {
             "name": "Coffee",
-            "url": "static/themes/coffee"
+            "url": "static/themes/coffee?v=2"
         },
         {
             "name": "Elite",
-            "url": "static/themes/elite"
+            "url": "static/themes/elite?v=2"
         },
         {
             "name": "GrayFox",
-            "url": "static/themes/grayfox"
+            "url": "static/themes/grayfox?v=2"
         },
         {
             "name": "Nightswatch",
-            "url": "static/themes/nightswatch"
+            "url": "static/themes/nightswatch?v=2"
         },
         {
             "name": "Osprey",
-            "url": "static/themes/osprey"
+            "url": "static/themes/osprey?v=2"
         },
         {
             "name": "Radioactive",
-            "url": "static/themes/radioactive"
+            "url": "static/themes/radioactive?v=2"
         },
         {
             "name": "Sky",
-            "url": "static/themes/sky"
+            "url": "static/themes/sky?v=2"
         }
     ],
     "buffers": {

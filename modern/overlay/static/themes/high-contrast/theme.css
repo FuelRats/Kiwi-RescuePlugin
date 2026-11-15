@@ -1,6 +1,8 @@
 /* High Contrast: white text on black, bright nick colours, /me actions, joins and parts, and
    visible borders. */
-@import '../dark/theme.css';
+/* ?v=2 keeps browsers off the theme file the old kiwi.fuelrats.com served at the same path,
+   which they may still hold in cache (see ratConfig.spec.js). */
+@import '../dark/theme.css?v=2';
 
 :root {
     --brand-primary: #1f6feb;

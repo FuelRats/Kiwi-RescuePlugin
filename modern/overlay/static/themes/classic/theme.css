@@ -1,6 +1,8 @@
 /* Classic: modelled on the Kiwi 1.5.1 Dark theme of the old kiwi.fuelrats.com:
    brighter text, bright green /me actions, muted green joins and muted red parts. */
-@import '../dark/theme.css';
+/* ?v=2 keeps browsers off the theme file the old kiwi.fuelrats.com served at the same path,
+   which they may still hold in cache (see ratConfig.spec.js). */
+@import '../dark/theme.css?v=2';
 
 :root {
     --brand-primary: #42b992;
