@@ -21,7 +21,7 @@
     "event-emitter": "^0.3.5",
     "font-awesome": "^4.7.0",
     "htmlparser2": "^10.0.0",
-    "i18next": "^25.3.4",
+    "i18next": "^26.3.4",
     "i18next-http-backend": "^4.0.10",
     "intersection-observer": "^0.12.2",
     "ip-regex": "^5.0.0",
